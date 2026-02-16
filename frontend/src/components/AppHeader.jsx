@@ -1,5 +1,6 @@
 import React from 'react';
 import CarIcon from './CarIcon.jsx';
+import Button from './ui/Button.jsx';
 
 function AppHeader({
   user,
@@ -11,10 +12,12 @@ function AppHeader({
   onChangeView,
 }) {
   return (
-    <header className="sticky top-0 z-30 flex flex-col gap-4 mb-6 bg-slate-950/95 backdrop-blur border-b border-slate-800/60 pb-3">
+    <header className="sticky top-0 z-30 flex flex-col gap-4 mb-8 bg-slate-950/80 backdrop-blur-sm border-b border-slate-800/60 pb-4">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Racing Arena</h1>
+          <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-sky-400 via-emerald-300 to-amber-200 bg-clip-text text-transparent">
+            Racing Arena
+          </h1>
           <p className="text-sm text-slate-400 mt-1">
             Add as many cars as you like, set a race timer, and let the backend decide the winner.
           </p>
@@ -54,53 +57,49 @@ function AppHeader({
               {socketError}
             </span>
           )}
-          <button
+          <Button
             type="button"
             onClick={onLogout}
-            className="text-xs px-3 py-1 rounded-lg border border-slate-700 bg-slate-900/70 hover:bg-slate-800/80 text-slate-300"
+            variant="outline"
+            size="sm"
+            className="text-xs px-3 py-1"
           >
             Logout
-          </button>
+          </Button>
         </div>
       </div>
       <nav className="flex items-center gap-2 text-xs">
         {isAdmin ? (
           <>
-            <button
+            <Button
               type="button"
               onClick={() => onChangeView('racer')}
-              className={`px-3 py-1.5 rounded-full border text-[0.7rem] font-medium transition-colors ${
-                activeView === 'racer'
-                  ? 'border-sky-500 bg-sky-500 text-white shadow-sm shadow-sky-500/40'
-                  : 'border-slate-700 bg-slate-900/70 text-slate-300 hover:bg-slate-800/80'
-              }`}
+              variant={activeView === 'racer' ? 'primary' : 'secondary'}
+              size="sm"
+              className="rounded-full text-[0.7rem]"
             >
               Race view
-            </button>
-            <button
+            </Button>
+            <Button
               type="button"
               onClick={() => onChangeView('admin')}
-              className={`px-3 py-1.5 rounded-full border text-[0.7rem] font-medium transition-colors ${
-                activeView === 'admin'
-                  ? 'border-emerald-500 bg-emerald-500 text-white shadow-sm shadow-emerald-500/40'
-                  : 'border-slate-700 bg-slate-900/70 text-slate-300 hover:bg-slate-800/80'
-              }`}
+              variant={activeView === 'admin' ? 'primary' : 'secondary'}
+              size="sm"
+              className="rounded-full text-[0.7rem]"
             >
               Admin dashboard
-            </button>
+            </Button>
           </>
         ) : (
-          <button
+          <Button
             type="button"
             onClick={() => onChangeView('user-dashboard')}
-            className={`px-3 py-1.5 rounded-full border text-[0.7rem] font-medium transition-colors ${
-              activeView === 'user-dashboard'
-                ? 'border-emerald-500 bg-emerald-500 text-white shadow-sm shadow-emerald-500/40'
-                : 'border-slate-700 bg-slate-900/70 text-slate-300 hover:bg-slate-800/80'
-            }`}
+            variant={activeView === 'user-dashboard' ? 'primary' : 'secondary'}
+            size="sm"
+            className="rounded-full text-[0.7rem]"
           >
             User dashboard
-          </button>
+          </Button>
         )}
       </nav>
     </header>

@@ -1,5 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { socket } from '../socket.js';
+import Card from './ui/Card.jsx';
+import Button from './ui/Button.jsx';
+import TextField from './ui/TextField.jsx';
 
 const COLORS = ['#ef4444', '#22c55e', '#3b82f6', '#eab308', '#a855f7', '#f97316'];
 
@@ -163,7 +166,7 @@ function UserDashboard({ user }) {
   return (
     <section className="mb-8 space-y-6">
       <div className="grid gap-4 md:grid-cols-2">
-        <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-4">
+        <Card>
           <h2 className="text-sm font-semibold mb-2">Profile</h2>
           <dl className="text-xs text-slate-300 space-y-1">
             <div className="flex justify-between">
@@ -183,9 +186,9 @@ function UserDashboard({ user }) {
               <dd className="text-[0.6rem] text-slate-500 truncate max-w-[12rem] text-right">{user?.id}</dd>
             </div>
           </dl>
-        </div>
+        </Card>
 
-        <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-4">
+        <Card>
           <h2 className="text-sm font-semibold mb-2">Create a garage car</h2>
           <p className="text-[0.7rem] text-slate-400 mb-3">
             Cars created here are stored in the database and associated with your account.
@@ -193,76 +196,79 @@ function UserDashboard({ user }) {
           <form onSubmit={handleCreateCar} className="space-y-2 text-[0.7rem]">
             <div className="flex flex-col gap-1">
               <label className="text-slate-300">Car name</label>
-              <input
+              <TextField
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="w-full rounded-md border border-slate-700 bg-slate-950/70 px-2 py-1 text-xs text-slate-100 focus:outline-none focus:ring-1 focus:ring-sky-500"
+                className="py-1 text-xs"
                 placeholder="e.g. Thunderbolt"
               />
             </div>
             <div className="grid grid-cols-3 gap-2">
               <div className="flex flex-col gap-1">
                 <label className="text-slate-300">Acceleration</label>
-                <input
+                <TextField
                   type="number"
                   min="1"
                   max="10"
                   step="0.5"
                   value={acceleration}
                   onChange={(e) => setAcceleration(e.target.value)}
-                  className="w-full rounded-md border border-slate-700 bg-slate-950/70 px-2 py-1 text-xs text-slate-100 focus:outline-none focus:ring-1 focus:ring-sky-500"
+                  className="py-1 text-xs"
                 />
               </div>
               <div className="flex flex-col gap-1">
                 <label className="text-slate-300">Top speed</label>
-                <input
+                <TextField
                   type="number"
                   min="50"
                   max="400"
                   step="10"
                   value={topSpeed}
                   onChange={(e) => setTopSpeed(e.target.value)}
-                  className="w-full rounded-md border border-slate-700 bg-slate-950/70 px-2 py-1 text-xs text-slate-100 focus:outline-none focus:ring-1 focus:ring-sky-500"
+                  className="py-1 text-xs"
                 />
               </div>
               <div className="flex flex-col gap-1">
                 <label className="text-slate-300">Handling</label>
-                <input
+                <TextField
                   type="number"
                   min="0"
                   max="1"
                   step="0.05"
                   value={handling}
                   onChange={(e) => setHandling(e.target.value)}
-                  className="w-full rounded-md border border-slate-700 bg-slate-950/70 px-2 py-1 text-xs text-slate-100 focus:outline-none focus:ring-1 focus:ring-sky-500"
+                  className="py-1 text-xs"
                 />
               </div>
             </div>
             {error && (
               <p className="text-[0.65rem] text-rose-300">{error}</p>
             )}
-            <button
+            <Button
               type="submit"
               disabled={creating}
-              className="mt-1 inline-flex items-center justify-center rounded-md border border-sky-500 bg-sky-600 px-3 py-1 text-[0.7rem] font-medium text-white shadow-sm shadow-sky-500/40 hover:bg-sky-500 disabled:opacity-60"
+              size="sm"
+              className="mt-1 text-[0.7rem]"
             >
               {creating ? 'Creating…' : 'Create car'}
-            </button>
+            </Button>
           </form>
-        </div>
+        </Card>
       </div>
 
-      <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-4">
+      <Card>
         <div className="flex items-center justify-between mb-2">
           <h2 className="text-sm font-semibold">My cars</h2>
-          <button
+          <Button
             type="button"
             onClick={fetchCars}
-            className="text-[0.7rem] px-2 py-1 rounded-md border border-slate-700 bg-slate-950/70 text-slate-200 hover:bg-slate-800/80"
+            variant="secondary"
+            size="sm"
+            className="text-[0.7rem] px-2 py-1"
           >
             Refresh
-          </button>
+          </Button>
         </div>
         {loading ? (
           <p className="text-[0.75rem] text-slate-400">Loading cars…</p>
@@ -306,18 +312,20 @@ function UserDashboard({ user }) {
             </table>
           </div>
         )}
-      </div>
+      </Card>
 
-      <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-4">
+      <Card>
         <div className="flex items-center justify-between mb-2">
           <h2 className="text-sm font-semibold">Join a live race</h2>
-          <button
+          <Button
             type="button"
             onClick={fetchRaces}
-            className="text-[0.7rem] px-2 py-1 rounded-md border border-slate-700 bg-slate-950/70 text-slate-200 hover:bg-slate-800/80"
+            variant="secondary"
+            size="sm"
+            className="text-[0.7rem] px-2 py-1"
           >
             Refresh races
-          </button>
+          </Button>
         </div>
         <p className="text-[0.7rem] text-slate-400 mb-3">
           Pick one of your cars and register it into a live race created by an admin.
@@ -365,16 +373,18 @@ function UserDashboard({ user }) {
             {registerMessage && (
               <p className="text-[0.65rem] text-slate-300">{registerMessage}</p>
             )}
-            <button
+            <Button
               type="submit"
               disabled={registering || cars.length === 0 || races.length === 0}
-              className="inline-flex items-center justify-center rounded-md border border-emerald-500 bg-emerald-600 px-3 py-1 text-[0.7rem] font-medium text-white shadow-sm shadow-emerald-500/40 hover:bg-emerald-500 disabled:opacity-60"
+              size="sm"
+              className="text-[0.7rem]"
+              variant="primary"
             >
               {registering ? 'Registering…' : 'Register car to race'}
-            </button>
+            </Button>
           </form>
         )}
-      </div>
+      </Card>
     </section>
   );
 }

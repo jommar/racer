@@ -1,5 +1,7 @@
 import React from 'react';
 import CarIcon from './CarIcon.jsx';
+import Card from './ui/Card.jsx';
+import Button from './ui/Button.jsx';
 
 function ReplayModal({
   cars,
@@ -9,18 +11,8 @@ function ReplayModal({
   onClose,
 }) {
   return (
-    <div
-      style={{
-        position: 'fixed',
-        inset: 0,
-        backgroundColor: 'rgba(15,23,42,0.9)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        zIndex: 40,
-      }}
-    >
-      <div className="w-full max-w-xl bg-slate-900/90 border border-slate-800 rounded-2xl p-4 sm:p-6 shadow-xl shadow-slate-950/70">
+    <div className="fixed inset-0 bg-slate-950/90 backdrop-blur-sm flex items-center justify-center z-40 px-4">
+      <Card className="w-full max-w-xl bg-slate-900/90 border border-slate-800">
         <div className="flex items-center justify-between mb-4">
           <div>
             <h2 className="text-lg font-semibold">Race replay</h2>
@@ -39,13 +31,15 @@ function ReplayModal({
               </p>
             )}
           </div>
-          <button
+          <Button
             type="button"
             onClick={onClose}
-            className="text-xs px-3 py-1 rounded-lg border border-slate-700 bg-slate-900/70 hover:bg-slate-800/80 text-slate-300"
+            size="sm"
+            variant="outline"
+            className="text-xs px-3 py-1"
           >
             Close
-          </button>
+          </Button>
         </div>
         <div className="border border-slate-800 rounded-xl px-3 py-3 bg-slate-950/60 max-h-64 overflow-auto mb-3 space-y-1">
           {cars.length === 0 ? (
@@ -118,7 +112,7 @@ function ReplayModal({
             </ol>
           </div>
         )}
-      </div>
+      </Card>
     </div>
   );
 }

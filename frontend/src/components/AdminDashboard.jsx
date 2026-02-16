@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { socket } from '../socket.js';
+import Card, { CardHeader, CardTitle, CardSubtitle, CardContent } from './ui/Card.jsx';
+import Button from './ui/Button.jsx';
 
 function AdminDashboard({ user, onViewRace, races, raceHistory, users, cars, loading, error, onRefresh }) {
   const [selectedRaceId, setSelectedRaceId] = useState(null);
@@ -80,21 +82,24 @@ function AdminDashboard({ user, onViewRace, races, raceHistory, users, cars, loa
   return (
     <main className="grid lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] gap-6">
       <section className="space-y-4">
-        <div className="bg-slate-900/60 border border-slate-800 rounded-2xl p-4 sm:p-5 shadow-xl shadow-slate-950/50">
-          <div className="flex items-center justify-between mb-4">
+        <Card>
+          <CardHeader>
             <div>
-              <h2 className="text-lg font-semibold">Admin Dashboard</h2>
-              <p className="text-xs text-slate-400 mt-1">Overview of races, users, and cars.</p>
+              <CardTitle>Admin Dashboard</CardTitle>
+              <CardSubtitle>Overview of races, users, and cars.</CardSubtitle>
             </div>
-            <button
+            <Button
               type="button"
               onClick={onRefresh}
               disabled={loading}
-              className="text-[0.7rem] px-3 py-1 rounded-lg border border-slate-700 bg-slate-900/70 hover:bg-slate-800/80 text-slate-300 disabled:opacity-50"
+              variant="secondary"
+              size="sm"
+              className="text-[0.7rem] px-3 py-1"
             >
               {loading ? 'Refreshing…' : 'Refresh'}
-            </button>
-          </div>
+            </Button>
+          </CardHeader>
+          <CardContent>
           <div className="mb-4 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-2 text-[0.8rem]">
             <div>
               <label className="block text-[0.7rem] text-slate-400 uppercase tracking-widest mb-1">
@@ -109,14 +114,15 @@ function AdminDashboard({ user, onViewRace, races, raceHistory, users, cars, loa
               />
             </div>
             <div className="flex flex-col items-start sm:items-end gap-1">
-              <button
+              <Button
                 type="button"
                 onClick={handleCreateRace}
                 disabled={creatingRace}
-                className="inline-flex items-center justify-center px-3 py-1.5 rounded-lg border border-sky-500 bg-sky-600 text-[0.8rem] font-medium text-white hover:bg-sky-500 disabled:opacity-60 disabled:cursor-not-allowed"
+                size="sm"
+                className="text-[0.8rem]"
               >
                 {creatingRace ? 'Creating race…' : 'Create race'}
-              </button>
+              </Button>
               {createRaceError && (
                 <p className="text-[0.7rem] text-rose-300">{createRaceError}</p>
               )}
@@ -126,15 +132,15 @@ function AdminDashboard({ user, onViewRace, races, raceHistory, users, cars, loa
             <p className="text-[0.75rem] text-rose-300 mb-3">{error}</p>
           )}
           <div className="grid sm:grid-cols-3 gap-3 mb-4 text-sm">
-            <div className="rounded-xl border border-slate-800 bg-slate-950/60 px-3 py-3">
+            <div className="rounded-xl bg-slate-950/60 px-3 py-3 ring-1 ring-slate-800/40">
               <div className="text-[0.7rem] text-slate-400 uppercase tracking-widest mb-1">Active races</div>
               <div className="text-2xl font-semibold text-slate-50">{races.length}</div>
             </div>
-            <div className="rounded-xl border border-slate-800 bg-slate-950/60 px-3 py-3">
+            <div className="rounded-xl bg-slate-950/60 px-3 py-3 ring-1 ring-slate-800/40">
               <div className="text-[0.7rem] text-slate-400 uppercase tracking-widest mb-1">Users</div>
               <div className="text-2xl font-semibold text-slate-50">{users.length}</div>
             </div>
-            <div className="rounded-xl border border-slate-800 bg-slate-950/60 px-3 py-3">
+            <div className="rounded-xl bg-slate-950/60 px-3 py-3 ring-1 ring-slate-800/40">
               <div className="text-[0.7rem] text-slate-400 uppercase tracking-widest mb-1">Cars</div>
               <div className="text-2xl font-semibold text-slate-50">{cars.length}</div>
             </div>
@@ -149,7 +155,7 @@ function AdminDashboard({ user, onViewRace, races, raceHistory, users, cars, loa
                   {races.map((r) => (
                     <li
                       key={r.raceId}
-                      className="flex items-center justify-between rounded-lg border border-slate-800 bg-slate-900/80 px-2 py-1.5 cursor-pointer hover:border-sky-500/60"
+                      className="flex items-center justify-between rounded-lg border border-slate-800/40 bg-slate-900/80 px-2 py-1.5 cursor-pointer hover:border-sky-500/60 hover:bg-slate-900/90 transition-colors"
                       onClick={() => setSelectedRaceId(r.raceId)}
                     >
                       <div className="flex flex-col">
@@ -161,7 +167,7 @@ function AdminDashboard({ user, onViewRace, races, raceHistory, users, cars, loa
                         </span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <button
+                        <Button
                           type="button"
                           onClick={(e) => {
                             e.stopPropagation();
@@ -169,30 +175,35 @@ function AdminDashboard({ user, onViewRace, races, raceHistory, users, cars, loa
                               onViewRace(r.raceId, r.status);
                             }
                           }}
-                          className="text-[0.65rem] px-2 py-0.5 rounded-full border border-sky-500 bg-sky-600 text-white hover:bg-sky-500 disabled:opacity-60"
+                          size="sm"
+                          variant="secondary"
+                          className="text-[0.65rem] px-2 py-0.5 rounded-full"
                         >
                           View
-                        </button>
-                        <button
+                        </Button>
+                        <Button
                           type="button"
                           onClick={(e) => {
                             e.stopPropagation();
                             handleCloseRace(r.raceId);
                           }}
-                          className="text-[0.65rem] px-2 py-0.5 rounded-full border border-rose-500 bg-rose-600 text-white hover:bg-rose-500 disabled:opacity-60"
+                          size="sm"
+                          variant="danger"
+                          className="text-[0.65rem] px-2 py-0.5 rounded-full"
                         >
                           Close
-                        </button>
-                        <button
+                        </Button>
+                        <Button
                           type="button"
                           onClick={(e) => {
                             e.stopPropagation();
                             handleStartRace(r.raceId);
                           }}
-                          className="text-[0.65rem] px-2 py-0.5 rounded-full border border-emerald-500 bg-emerald-600 text-white hover:bg-emerald-500 disabled:opacity-60"
+                          size="sm"
+                          className="text-[0.65rem] px-2 py-0.5 rounded-full"
                         >
                           Start
-                        </button>
+                        </Button>
                         <span className="text-[0.65rem] px-2 py-0.5 rounded-full border border-slate-700 bg-slate-950/60 text-slate-300 capitalize">
                           {r.status}
                         </span>
@@ -219,7 +230,7 @@ function AdminDashboard({ user, onViewRace, races, raceHistory, users, cars, loa
                     {selectedRaceDetails.cars.map((car) => (
                       <li
                         key={car.id}
-                        className="flex items-center justify-between rounded-lg border border-slate-800 bg-slate-900/80 px-2 py-1.5"
+                        className="flex items-center justify-between rounded-lg border border-slate-800/40 bg-slate-900/80 px-2 py-1.5"
                       >
                         <div className="flex items-center gap-2">
                           <span
@@ -253,7 +264,7 @@ function AdminDashboard({ user, onViewRace, races, raceHistory, users, cars, loa
                   {raceHistory.map((r) => (
                     <li
                       key={r.id}
-                      className="flex items-center justify-between rounded-lg border border-slate-800 bg-slate-900/80 px-2 py-1.5"
+                      className="flex items-center justify-between rounded-lg border border-slate-800/40 bg-slate-900/80 px-2 py-1.5"
                     >
                       <div className="flex flex-col">
                         <span className="font-mono text-[0.7rem] text-slate-300 truncate max-w-[14rem]">
@@ -279,13 +290,14 @@ function AdminDashboard({ user, onViewRace, races, raceHistory, users, cars, loa
                   ))}
                 </ul>
               )}
+              </div>
             </div>
-          </div>
-        </div>
+            </CardContent>
+          </Card>
       </section>
 
       <section className="space-y-4">
-        <div className="bg-slate-900/60 border border-slate-800 rounded-2xl p-4 sm:p-5 shadow-xl shadow-slate-950/50">
+        <div className="bg-slate-900/60 border border-slate-800/70 rounded-2xl p-4 sm:p-5 shadow-xl shadow-slate-950/50">
           <div className="flex items-center justify-between mb-3">
             <h2 className="text-lg font-semibold">Users</h2>
           </div>
@@ -296,7 +308,7 @@ function AdminDashboard({ user, onViewRace, races, raceHistory, users, cars, loa
               {users.map((u) => (
                 <li
                   key={u.id}
-                  className="flex items-center justify-between rounded-lg border border-slate-800 bg-slate-900/80 px-2 py-1.5"
+                  className="flex items-center justify-between rounded-lg border border-slate-800/40 bg-slate-900/80 px-2 py-1.5"
                 >
                   <div className="flex flex-col">
                     <span className="text-slate-200">{u.name}</span>
@@ -311,7 +323,7 @@ function AdminDashboard({ user, onViewRace, races, raceHistory, users, cars, loa
           )}
         </div>
 
-        <div className="bg-slate-900/60 border border-slate-800 rounded-2xl p-4 sm:p-5 shadow-xl shadow-slate-950/50">
+        <div className="bg-slate-900/60 border border-slate-800/70 rounded-2xl p-4 sm:p-5 shadow-xl shadow-slate-950/50">
           <div className="flex items-center justify-between mb-3">
             <h2 className="text-lg font-semibold">Cars</h2>
           </div>
@@ -322,7 +334,7 @@ function AdminDashboard({ user, onViewRace, races, raceHistory, users, cars, loa
               {cars.map((c) => (
                 <li
                   key={c.id}
-                  className="flex items-center justify-between rounded-lg border border-slate-800 bg-slate-900/80 px-2 py-1.5"
+                  className="flex items-center justify-between rounded-lg border border-slate-800/40 bg-slate-900/80 px-2 py-1.5"
                 >
                   <div className="flex items-center gap-2">
                     <span

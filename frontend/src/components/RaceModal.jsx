@@ -1,5 +1,7 @@
 import React from 'react';
 import CarIcon from './CarIcon.jsx';
+import Card from './ui/Card.jsx';
+import Button from './ui/Button.jsx';
 
 function RaceModal({
   cars,
@@ -13,18 +15,8 @@ function RaceModal({
   if (!cars) return null;
 
   return (
-    <div
-      style={{
-        position: 'fixed',
-        inset: 0,
-        backgroundColor: 'rgba(15,23,42,0.9)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        zIndex: 50,
-      }}
-    >
-      <div className="w-full max-w-xl bg-slate-900/90 border border-slate-800 rounded-2xl p-4 sm:p-6 shadow-xl shadow-slate-950/70">
+    <div className="fixed inset-0 bg-slate-950/90 backdrop-blur-sm flex items-center justify-center z-50 px-4">
+      <Card className="w-full max-w-xl bg-slate-900/90 border border-slate-800">
         <div className="flex items-center justify-between mb-4">
           <div>
             <h2 className="text-lg font-semibold">Live race</h2>
@@ -32,13 +24,15 @@ function RaceModal({
               Visualizing the current race using a simple ASCII track.
             </p>
           </div>
-          <button
+          <Button
             type="button"
             onClick={onClose}
-            className="text-xs px-3 py-1 rounded-lg border border-slate-700 bg-slate-900/70 hover:bg-slate-800/80 text-slate-300"
+            size="sm"
+            variant="outline"
+            className="text-xs px-3 py-1"
           >
             Close
-          </button>
+          </Button>
         </div>
         <div className="flex items-center justify-between text-xs text-slate-400 mb-3">
           <span>
@@ -140,7 +134,7 @@ function RaceModal({
             </p>
           )}
         </div>
-      </div>
+      </Card>
     </div>
   );
 }

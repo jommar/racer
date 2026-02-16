@@ -1,4 +1,5 @@
 import React from 'react';
+import Badge from './ui/Badge.jsx';
 
 function RaceSetupAndGarage({
   raceStatus,
@@ -31,14 +32,21 @@ function RaceSetupAndGarage({
             <h2 className="text-lg font-semibold">Race Setup</h2>
             <p className="text-xs text-slate-400 mt-1">Configure race duration and add cars.</p>
           </div>
-          <div className="flex items-center gap-3 text-xs text-slate-400">
+          <div className="flex items-center gap-2 text-xs text-slate-400">
             <span className="uppercase tracking-wide text-[0.65rem]">Status:</span>
-            <span className="px-2 py-1 rounded-full bg-slate-800 border border-slate-700/60">
-              {raceStatus === 'idle' && 'Idle'}
-              {raceStatus === 'ready' && 'Ready'}
-              {raceStatus === 'running' && 'Running'}
-              {raceStatus === 'finished' && 'Finished'}
-            </span>
+            <Badge
+              variant={
+                raceStatus === 'running'
+                  ? 'success'
+                  : raceStatus === 'ready'
+                  ? 'info'
+                  : raceStatus === 'finished'
+                  ? 'warning'
+                  : 'neutral'
+              }
+            >
+              {raceStatus || 'idle'}
+            </Badge>
           </div>
         </div>
 
@@ -193,7 +201,7 @@ function RaceSetupAndGarage({
             {cars.map((car) => (
               <li
                 key={car.id}
-                className="flex items-center justify-between gap-3 rounded-xl border border-slate-800 bg-slate-900/80 px-3 py-2 text-xs"
+                className="flex items-center justify-between gap-3 rounded-xl border border-slate-800/40 bg-slate-950/40 px-3 py-2 text-xs hover:bg-slate-900/80 transition-colors"
               >
                 <div className="flex items-center gap-3">
                   <span

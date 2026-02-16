@@ -166,7 +166,7 @@ function App() {
   // Dedicated race viewer page: no navigation/header, just the read-only race view.
   if (activeView === 'race-page') {
     return (
-      <div className="min-h-screen bg-slate-950 text-slate-50 flex justify-center items-start py-6 px-4 overflow-y-auto">
+      <div className="min-h-screen text-slate-50 flex justify-center items-start py-8 px-4 overflow-y-auto">
         <div className="w-full max-w-5xl">
           <RaceView
             onSocketStatusChange={handleSocketStatusChange}
@@ -202,7 +202,7 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-50 flex justify-center items-start py-6 px-4 overflow-y-auto">
+    <div className="min-h-screen text-slate-50 flex justify-center items-start py-8 px-4 overflow-y-auto">
       <div className="w-full max-w-5xl">
         <AppHeader
           user={user}
