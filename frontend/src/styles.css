@@ -1,0 +1,635 @@
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'SF Pro Text',
+    'Segoe UI', sans-serif;
+}
+
+body {
+  background: radial-gradient(circle at top, #020617 0, #020617 40%, #020617 100%);
+}
+
+:root {
+  color-scheme: dark;
+}
+
+input,
+button {
+  font-family: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: not-allowed;
+}
+
+/* Utility-like classes compiled manually for now (Tailwind-inspired) */
+
+.min-h-screen {
+  min-height: 100vh;
+}
+
+.bg-slate-950 {
+  background-color: #020617;
+}
+
+.bg-slate-900\/60 {
+  background-color: rgba(15, 23, 42, 0.6);
+}
+
+.bg-slate-900\/80 {
+  background-color: rgba(15, 23, 42, 0.8);
+}
+
+.bg-slate-900 {
+  background-color: #0f172a;
+}
+
+.bg-slate-800 {
+  background-color: #1e293b;
+}
+
+.bg-slate-800\/50 {
+  background-color: rgba(30, 41, 59, 0.5);
+}
+
+.bg-slate-800\/80 {
+  background-color: rgba(30, 41, 59, 0.8);
+}
+
+.bg-slate-950 {
+  background-color: #020617;
+}
+
+.bg-emerald-500 {
+  background-color: #10b981;
+}
+
+.bg-emerald-500\/10 {
+  background-color: rgba(16, 185, 129, 0.1);
+}
+
+.bg-amber-300 {
+  background-color: #fcd34d;
+}
+
+.bg-rose-500\/10 {
+  background-color: rgba(244, 63, 94, 0.1);
+}
+
+.bg-rose-400 {
+  background-color: #fb7185;
+}
+
+.bg-emerald-400 {
+  background-color: #34d399;
+}
+
+.bg-sky-500 {
+  background-color: #0ea5e9;
+}
+
+.bg-sky-400 {
+  background-color: #38bdf8;
+}
+
+.text-slate-50 {
+  color: #f8fafc;
+}
+
+.text-slate-100 {
+  color: #e2e8f0;
+}
+
+.text-slate-200 {
+  color: #e5e7eb;
+}
+
+.text-slate-300 {
+  color: #cbd5f5;
+}
+
+.text-slate-400 {
+  color: #94a3b8;
+}
+
+.text-slate-500 {
+  color: #64748b;
+}
+
+.text-emerald-300 {
+  color: #6ee7b7;
+}
+
+.text-rose-300 {
+  color: #fecdd3;
+}
+
+.text-amber-300 {
+  color: #fcd34d;
+}
+
+.text-xs {
+  font-size: 0.75rem;
+}
+
+.text-sm {
+  font-size: 0.875rem;
+}
+
+.text-lg {
+  font-size: 1.125rem;
+}
+
+.text-3xl {
+  font-size: 1.875rem;
+}
+
+.font-medium {
+  font-weight: 500;
+}
+
+.font-semibold {
+  font-weight: 600;
+}
+
+.font-bold {
+  font-weight: 700;
+}
+
+.tracking-tight {
+  letter-spacing: -0.02em;
+}
+
+.tracking-widest {
+  letter-spacing: 0.16em;
+}
+
+.rounded-full {
+  border-radius: 9999px;
+}
+
+.rounded-lg {
+  border-radius: 0.5rem;
+}
+
+.rounded-xl {
+  border-radius: 0.75rem;
+}
+
+.rounded-2xl {
+  border-radius: 1rem;
+}
+
+.border {
+  border-width: 1px;
+}
+
+.border-slate-700 {
+  border-color: #334155;
+}
+
+.border-slate-700\/60 {
+  border-color: rgba(51, 65, 85, 0.6);
+}
+
+.border-slate-800 {
+  border-color: #1f2937;
+}
+
+.border-emerald-500\/70 {
+  border-color: rgba(16, 185, 129, 0.7);
+}
+
+.border-emerald-500\/40 {
+  border-color: rgba(16, 185, 129, 0.4);
+}
+
+.border-rose-500\/40 {
+  border-color: rgba(244, 63, 94, 0.4);
+}
+
+.border-sky-500\/70 {
+  border-color: rgba(14, 165, 233, 0.7);
+}
+
+.flex {
+  display: flex;
+}
+
+.grid {
+  display: grid;
+}
+
+.inline-flex {
+  display: inline-flex;
+}
+
+.items-center {
+  align-items: center;
+}
+
+.items-end {
+  align-items: flex-end;
+}
+
+.justify-center {
+  justify-content: center;
+}
+
+.justify-between {
+  justify-content: space-between;
+}
+
+.justify-end {
+  justify-content: flex-end;
+}
+
+.gap-1 {
+  gap: 0.25rem;
+}
+
+.gap-2 {
+  gap: 0.5rem;
+}
+
+.gap-3 {
+  gap: 0.75rem;
+}
+
+.gap-4 {
+  gap: 1rem;
+}
+
+.gap-6 {
+  gap: 1.5rem;
+}
+
+.space-y-2 > :not(:last-child) {
+  margin-bottom: 0.5rem;
+}
+
+.space-y-4 > :not(:last-child) {
+  margin-bottom: 1rem;
+}
+
+.space-y-2 {
+  display: flex;
+  flex-direction: column;
+}
+
+.space-y-4 {
+  display: flex;
+  flex-direction: column;
+}
+
+.p-4 {
+  padding: 1rem;
+}
+
+.p-5 {
+  padding: 1.25rem;
+}
+
+.px-2 {
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
+}
+
+.px-3 {
+  padding-left: 0.75rem;
+  padding-right: 0.75rem;
+}
+
+.px-4 {
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+.py-1 {
+  padding-top: 0.25rem;
+  padding-bottom: 0.25rem;
+}
+
+.py-1\.5 {
+  padding-top: 0.375rem;
+  padding-bottom: 0.375rem;
+}
+
+.py-2 {
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+}
+
+.py-2\.5 {
+  padding-top: 0.625rem;
+  padding-bottom: 0.625rem;
+}
+
+.py-8 {
+  padding-top: 2rem;
+  padding-bottom: 2rem;
+}
+
+.px-4 {
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+.mb-1 {
+  margin-bottom: 0.25rem;
+}
+
+.mb-3 {
+  margin-bottom: 0.75rem;
+}
+
+.mb-4 {
+  margin-bottom: 1rem;
+}
+
+.mb-5 {
+  margin-bottom: 1.25rem;
+}
+
+.mt-1 {
+  margin-top: 0.25rem;
+}
+
+.mt-4 {
+  margin-top: 1rem;
+}
+
+.h-0\.5 {
+  height: 0.125rem;
+}
+
+.h-2 {
+  height: 0.5rem;
+}
+
+.h-4 {
+  height: 1rem;
+}
+
+.h-8 {
+  height: 2rem;
+}
+
+.h-40 {
+  height: 10rem;
+}
+
+.w-2 {
+  width: 0.5rem;
+}
+
+.w-6 {
+  width: 1.5rem;
+}
+
+.w-10 {
+  width: 2.5rem;
+}
+
+.max-w-5xl {
+  max-width: 64rem;
+}
+
+.max-w-\[8rem\] {
+  max-width: 8rem;
+}
+
+.w-full {
+  width: 100%;
+}
+
+.min-w-0 {
+  min-width: 0;
+}
+
+.max-h-64 {
+  max-height: 16rem;
+}
+
+.overflow-hidden {
+  overflow: hidden;
+}
+
+.overflow-auto {
+  overflow: auto;
+}
+
+.rounded-2xl {
+  border-radius: 1rem;
+}
+
+.shadow-xl {
+  box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.8);
+}
+
+.shadow-md {
+  box-shadow: 0 4px 6px -1px rgba(15, 23, 42, 0.6);
+}
+
+.shadow-slate-950\/50 {
+  box-shadow: 0 20px 40px rgba(2, 6, 23, 0.5);
+}
+
+.shadow-emerald-500\/25 {
+  box-shadow: 0 20px 40px rgba(16, 185, 129, 0.25);
+}
+
+.shadow-sky-500\/25 {
+  box-shadow: 0 16px 35px rgba(14, 165, 233, 0.25);
+}
+
+.text-center {
+  text-align: center;
+}
+
+.truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.uppercase {
+  text-transform: uppercase;
+}
+
+.text-[0\.65rem] {
+  font-size: 0.65rem;
+}
+
+.text-[0\.7rem] {
+  font-size: 0.7rem;
+}
+
+.mt-1 {
+  margin-top: 0.25rem;
+}
+
+.mt-4 {
+  margin-top: 1rem;
+}
+
+.mt-6 {
+  margin-top: 1.5rem;
+}
+
+.mb-6 {
+  margin-bottom: 1.5rem;
+}
+
+.py-8 {
+  padding-top: 2rem;
+  padding-bottom: 2rem;
+}
+
+.px-4 {
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+.border-t {
+  border-top-width: 1px;
+}
+
+.border-t-slate-800 {
+  border-top-color: #1f2937;
+}
+
+.text-slate-50 {
+  color: #f8fafc;
+}
+
+.text-white {
+  color: #ffffff;
+}
+
+.pointer-events-none {
+  pointer-events: none;
+}
+
+.relative {
+  position: relative;
+}
+
+.absolute {
+  position: absolute;
+}
+
+.inset-0 {
+  inset: 0;
+}
+
+.inset-3 {
+  top: 0.75rem;
+  bottom: 0.75rem;
+  left: 0.75rem;
+  right: 0.75rem;
+}
+
+.inset-x-4 {
+  left: 1rem;
+  right: 1rem;
+}
+
+.top-3 {
+  top: 0.75rem;
+}
+
+.top-6 {
+  top: 1.5rem;
+}
+
+.bottom-8 {
+  bottom: 2rem;
+}
+
+.inset-x-4 {
+  left: 1rem;
+  right: 1rem;
+}
+
+.top-3 {
+  top: 0.75rem;
+}
+
+.bottom-8 {
+  bottom: 2rem;
+}
+
+.inset-x-4 {
+  left: 1rem;
+  right: 1rem;
+}
+
+.top-6 {
+  top: 1.5rem;
+}
+
+.bottom-8 {
+  bottom: 2rem;
+}
+
+.inset-x-4 {
+  left: 1rem;
+  right: 1rem;
+}
+
+.top-6 {
+  top: 1.5rem;
+}
+
+.bottom-8 {
+  bottom: 2rem;
+}
+
+.py-8 {
+  padding-top: 2rem;
+  padding-bottom: 2rem;
+}
+
+.max-w-5xl {
+  max-width: 64rem;
+}
+
+@media (min-width: 640px) {
+  .sm\:flex-row {
+    flex-direction: row;
+  }
+
+  .sm\:items-center {
+    align-items: center;
+  }
+
+  .sm\:col-span-2 {
+    grid-column: span 2 / span 2;
+  }
+
+  .sm\:inline-flex {
+    display: inline-flex;
+  }
+}
+
+@media (min-width: 768px) {
+  .md\:text-base {
+    font-size: 1rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .lg\:grid-cols-\[minmax\(0,3fr\)_minmax\(0,2fr\)\] {
+    grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+  }
+}
