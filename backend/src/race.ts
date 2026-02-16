@@ -22,6 +22,9 @@ export type Car = {
   name: string;
   color: string;
   attributes: CarAttributes;
+  /** Optional owner information when cars come from a registered user. */
+  ownerUserId?: string;
+  ownerName?: string;
 };
 
 /**
@@ -106,6 +109,13 @@ export class RaceManager {
   private currentRaceId: string | null = null;
   /** Tick history captured for replay/logging. */
   private tickHistory: { at: number; tick: RaceTick[] }[] = [];
+  /** External lobby ID (UUID) so logs can be tied back to /race/:id. */
+  private lobbyId: string | null = null;
+
+  /** Associate this manager with a specific lobby UUID. */
+  setLobbyId(id: string) {
+    this.lobbyId = id;
+  }
 
   /**
    * Returns the current in-memory race state.
@@ -417,9 +427,17 @@ export class RaceManager {
       // best-effort only
     }
 
-    const filePath = path.join(logDir, `${this.currentRaceId}.json`);
+    // Prefer using the external lobby UUID for the filename so
+    // logs line up naturally with /race/:id URLs. Fall back to
+    // the internal raceId for backward compatibility.
+    const fileNameBase = this.lobbyId || this.currentRaceId;
+    if (!fileNameBase) {
+      return;
+    }
+    const filePath = path.join(logDir, `${fileNameBase}.json`);
     const payload = {
       raceId: this.currentRaceId,
+      lobbyId: this.lobbyId,
       startedAt: this.state.startedAt,
       finishedAt: this.state.finishedAt,
       durationMs: this.state.durationMs,

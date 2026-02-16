@@ -13,6 +13,9 @@ frontend/dist/
 # Backend logs (race replays)
 backend/logs/
 
+# SQLite database file
+backend/racer.db
+
 # Vite
 frontend/.vite/
 
