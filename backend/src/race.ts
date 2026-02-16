@@ -149,6 +149,11 @@ export class RaceManager {
     if (this.state.status === 'running') {
       return;
     }
+    // Do not allow the same car (by id) to be added twice
+    // to the same race lobby.
+    if (this.state.cars.some((existing) => existing.id === car.id)) {
+      return;
+    }
     this.state.cars = [...this.state.cars, car];
     if (this.state.status === 'idle') {
       this.state.status = 'ready';

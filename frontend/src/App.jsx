@@ -170,6 +170,7 @@ function App() {
         <div className="w-full max-w-5xl">
           <RaceView
             onSocketStatusChange={handleSocketStatusChange}
+            user={user}
             readOnly
           />
         </div>
@@ -220,10 +221,11 @@ function App() {
         ) : activeView === 'race-page' ? (
           <RaceView
             onSocketStatusChange={handleSocketStatusChange}
+            user={user}
             readOnly
           />
         ) : (
-          <RaceView onSocketStatusChange={handleSocketStatusChange} />
+          <RaceView onSocketStatusChange={handleSocketStatusChange} user={user} />
         )}
       </div>
     </div>

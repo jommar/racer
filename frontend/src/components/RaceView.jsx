@@ -27,7 +27,7 @@ function normalizeLogs(logs) {
     .slice(0, 10);
 }
 
-function RaceView({ onSocketStatusChange, renderMain = true, viewRequest = null, readOnly = false }) {
+function RaceView({ onSocketStatusChange, renderMain = true, viewRequest = null, readOnly = false, user }) {
   const [socketConnected, setSocketConnected] = useState(false);
   const [socketError, setSocketError] = useState(null);
 
@@ -57,6 +57,23 @@ function RaceView({ onSocketStatusChange, renderMain = true, viewRequest = null,
   const [acceleration, setAcceleration] = useState(5);
   const [topSpeed, setTopSpeed] = useState(200);
   const [handling, setHandling] = useState(0.7);
+
+  // Logged-in user's garage cars (for registering into a race when
+  // viewing /race/:id as a regular user).
+  const [userCars, setUserCars] = useState([]);
+  const [userCarsLoading, setUserCarsLoading] = useState(false);
+  const [userCarsError, setUserCarsError] = useState(null);
+  const [selectedUserCarId, setSelectedUserCarId] = useState('');
+  const [registeringUserCar, setRegisteringUserCar] = useState(false);
+  const [registerUserCarMessage, setRegisterUserCarMessage] = useState(null);
+
+  // All cars (admin view) for registering any car into a race.
+  const [adminCars, setAdminCars] = useState([]);
+  const [adminCarsLoading, setAdminCarsLoading] = useState(false);
+  const [adminCarsError, setAdminCarsError] = useState(null);
+  const [selectedAdminCarId, setSelectedAdminCarId] = useState('');
+  const [registeringAdminCar, setRegisteringAdminCar] = useState(false);
+  const [registerAdminCarMessage, setRegisterAdminCarMessage] = useState(null);
 
   // Load stored race state on mount (editable mode only).
   // In read-only mode (e.g. /race/:id), derive raceId from the URL
@@ -104,6 +121,58 @@ function RaceView({ onSocketStatusChange, renderMain = true, viewRequest = null,
       // ignore
     }
   }, [readOnly]);
+
+  // When viewing a race page as a regular user, load their garage cars
+  // so they can register one into the current race.
+  useEffect(() => {
+    if (!readOnly) return;
+    if (!user || !user.id) return;
+
+    const fetchUserCars = async () => {
+      try {
+        setUserCarsLoading(true);
+        setUserCarsError(null);
+        const res = await fetch(`http://localhost:4000/user/${encodeURIComponent(user.id)}/cars`, {
+          credentials: 'include',
+        });
+        if (!res.ok) throw new Error('Failed to load your cars');
+        const data = await res.json();
+        setUserCars(Array.isArray(data.cars) ? data.cars : []);
+      } catch (err) {
+        setUserCarsError(err?.message || 'Unable to load your cars');
+      } finally {
+        setUserCarsLoading(false);
+      }
+    };
+
+    fetchUserCars();
+  }, [readOnly, user && user.id]);
+
+  // When viewing a race page as an admin, load all cars so they can
+  // register any car into the current race.
+  useEffect(() => {
+    if (!readOnly) return;
+    if (!user || user.role !== 'admin') return;
+
+    const fetchAdminCars = async () => {
+      try {
+        setAdminCarsLoading(true);
+        setAdminCarsError(null);
+        const res = await fetch('http://localhost:4000/admin/cars', {
+          credentials: 'include',
+        });
+        if (!res.ok) throw new Error('Failed to load cars');
+        const data = await res.json();
+        setAdminCars(Array.isArray(data.cars) ? data.cars : []);
+      } catch (err) {
+        setAdminCarsError(err?.message || 'Unable to load cars');
+      } finally {
+        setAdminCarsLoading(false);
+      }
+    };
+
+    fetchAdminCars();
+  }, [readOnly, user && user.role]);
 
   // Persist race state in editable mode only.
   useEffect(() => {
@@ -332,6 +401,111 @@ function RaceView({ onSocketStatusChange, renderMain = true, viewRequest = null,
     setCarName('');
   };
 
+  const handleRegisterUserCarToRace = (e) => {
+    e.preventDefault();
+    setRegisterUserCarMessage(null);
+
+    if (!raceId) {
+      setRegisterUserCarMessage('Race not found.');
+      return;
+    }
+    if (raceStatus === 'running' || raceStatus === 'finished') {
+      setRegisterUserCarMessage('You can only register before the race starts or while it is waiting.');
+      return;
+    }
+    if (!selectedUserCarId) {
+      setRegisterUserCarMessage('Select one of your cars first.');
+      return;
+    }
+
+    const car = userCars.find((c) => c.id === selectedUserCarId);
+    if (!car) {
+      setRegisterUserCarMessage('Selected car was not found.');
+      return;
+    }
+
+    const alreadyInRace = cars.some((existing) => existing.id === car.id);
+    if (alreadyInRace) {
+      setRegisterUserCarMessage('This car is already registered in this race.');
+      return;
+    }
+
+    setRegisteringUserCar(true);
+    try {
+      const payloadCar = {
+        id: car.id,
+        name: car.name,
+        color: car.color,
+        ownerUserId: user?.id,
+        ownerName: user?.name,
+        attributes: {
+          acceleration: Number(car.acceleration) || 1,
+          topSpeed: Number(car.topSpeed) || 1,
+          handling: Math.min(1, Math.max(0, Number(car.handling) || 0.5)),
+        },
+      };
+
+      socket.emit('car:add', { raceId, car: payloadCar });
+      setRegisterUserCarMessage(`Registered "${car.name}" to this race.`);
+    } catch (err) {
+      setRegisterUserCarMessage(err?.message || 'Failed to register car to race.');
+    } finally {
+      setRegisteringUserCar(false);
+    }
+  };
+
+  const handleRegisterAdminCarToRace = (e) => {
+    e.preventDefault();
+    setRegisterAdminCarMessage(null);
+
+    if (!raceId) {
+      setRegisterAdminCarMessage('Race not found.');
+      return;
+    }
+    if (raceStatus === 'running' || raceStatus === 'finished') {
+      setRegisterAdminCarMessage('You can only register before the race starts or while it is waiting.');
+      return;
+    }
+    if (!selectedAdminCarId) {
+      setRegisterAdminCarMessage('Select a car first.');
+      return;
+    }
+
+    const car = adminCars.find((c) => c.id === selectedAdminCarId);
+    if (!car) {
+      setRegisterAdminCarMessage('Selected car was not found.');
+      return;
+    }
+
+    const alreadyInRace = cars.some((existing) => existing.id === car.id);
+    if (alreadyInRace) {
+      setRegisterAdminCarMessage('This car is already registered in this race.');
+      return;
+    }
+
+    setRegisteringAdminCar(true);
+    try {
+      const payloadCar = {
+        id: car.id,
+        name: car.name,
+        color: car.color,
+        ownerUserId: car.userId,
+        attributes: {
+          acceleration: Number(car.acceleration) || 1,
+          topSpeed: Number(car.topSpeed) || 1,
+          handling: Math.min(1, Math.max(0, Number(car.handling) || 0.5)),
+        },
+      };
+
+      socket.emit('car:add', { raceId, car: payloadCar });
+      setRegisterAdminCarMessage(`Registered "${car.name}" to this race.`);
+    } catch (err) {
+      setRegisterAdminCarMessage(err?.message || 'Failed to register car to race.');
+    } finally {
+      setRegisteringAdminCar(false);
+    }
+  };
+
   const handleCreateRace = () => {
     if (readOnly) return;
     setResults([]);
@@ -375,6 +549,13 @@ function RaceView({ onSocketStatusChange, renderMain = true, viewRequest = null,
     setResults([]);
     socket.emit('race:start', { raceId });
     setShowRaceModal(true);
+  };
+
+  const handleAdminStartRace = () => {
+    if (!readOnly) return;
+    if (!raceId) return;
+    if (raceStatus === 'running' || raceStatus === 'finished') return;
+    socket.emit('race:start', { raceId });
   };
 
   const handleResetRace = () => {
@@ -524,6 +705,182 @@ function RaceView({ onSocketStatusChange, renderMain = true, viewRequest = null,
             onRefreshReplays={fetchReplayLogs}
             onStartReplay={startReplay}
           />
+          {readOnly && user && user.role === 'admin' && (
+            <section className="col-span-full mt-4 rounded-xl border border-slate-800 bg-slate-900/60 p-4">
+              <div className="flex items-center justify-between mb-2">
+                <h2 className="text-sm font-semibold">Register any car</h2>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setRegisterAdminCarMessage(null);
+                    setAdminCarsError(null);
+                    setAdminCarsLoading(true);
+                    fetch('http://localhost:4000/admin/cars', {
+                      credentials: 'include',
+                    })
+                      .then((res) => {
+                        if (!res.ok) throw new Error('Failed to load cars');
+                        return res.json();
+                      })
+                      .then((data) => {
+                        setAdminCars(Array.isArray(data.cars) ? data.cars : []);
+                      })
+                      .catch((err) => {
+                        setAdminCarsError(err?.message || 'Unable to load cars');
+                      })
+                      .finally(() => {
+                        setAdminCarsLoading(false);
+                      });
+                  }}
+                  className="text-[0.7rem] px-2 py-1 rounded-md border border-slate-700 bg-slate-950/70 text-slate-200 hover:bg-slate-800/80"
+                >
+                  Refresh
+                </button>
+              </div>
+              <div className="mb-3 flex items-center justify-between text-[0.7rem] text-slate-300">
+                <span>
+                  Status: <span className="capitalize">{raceStatus}</span>
+                </span>
+                <button
+                  type="button"
+                  onClick={handleAdminStartRace}
+                  disabled={!raceId || raceStatus === 'running' || raceStatus === 'finished'}
+                  className="inline-flex items-center justify-center rounded-md border border-emerald-500 bg-emerald-600 px-3 py-1 text-[0.7rem] font-medium text-white shadow-sm shadow-emerald-500/40 hover:bg-emerald-500 disabled:opacity-60"
+                >
+                  Start race
+                </button>
+              </div>
+              <p className="text-[0.7rem] text-slate-400 mb-3">
+                Pick any car from the database and register it into this race.
+              </p>
+              {adminCarsLoading ? (
+                <p className="text-[0.75rem] text-slate-400">Loading cars…</p>
+              ) : adminCarsError ? (
+                <p className="text-[0.7rem] text-rose-300">{adminCarsError}</p>
+              ) : adminCars.length === 0 ? (
+                <p className="text-[0.75rem] text-slate-400">No cars are available in the database yet.</p>
+              ) : (
+                <form onSubmit={handleRegisterAdminCarToRace} className="space-y-3 text-[0.7rem]">
+                  <div className="flex flex-col gap-1 max-w-xs">
+                    <label className="text-slate-300">Car</label>
+                    <select
+                      value={selectedAdminCarId}
+                      onChange={(e) => setSelectedAdminCarId(e.target.value)}
+                      className="w-full rounded-md border border-slate-700 bg-slate-950/70 px-2 py-1 text-xs text-slate-100 focus:outline-none focus:ring-1 focus:ring-sky-500"
+                    >
+                      <option value="">Select a car…</option>
+                      {adminCars.map((car) => {
+                        const inRace = cars.some((existing) => existing.id === car.id);
+                        return (
+                          <option key={car.id} value={car.id} disabled={inRace}>
+                            {car.name} (acc {car.acceleration}, top {car.topSpeed}, handling {car.handling})
+                            {inRace ? ' — already in this race' : ''}
+                          </option>
+                        );
+                      })}
+                    </select>
+                  </div>
+                  {registerAdminCarMessage && (
+                    <p className="text-[0.65rem] text-slate-300">{registerAdminCarMessage}</p>
+                  )}
+                  <button
+                    type="submit"
+                    disabled={
+                      registeringAdminCar ||
+                      !raceId ||
+                      raceStatus === 'running' ||
+                      raceStatus === 'finished'
+                    }
+                    className="inline-flex items-center justify-center rounded-md border border-emerald-500 bg-emerald-600 px-3 py-1 text-[0.7rem] font-medium text-white shadow-sm shadow-emerald-500/40 hover:bg-emerald-500 disabled:opacity-60"
+                  >
+                    {registeringAdminCar ? 'Registering…' : 'Register car to this race'}
+                  </button>
+                </form>
+              )}
+            </section>
+          )}
+          {readOnly && user && user.role === 'user' && (
+            <section className="col-span-full mt-4 rounded-xl border border-slate-800 bg-slate-900/60 p-4">
+              <div className="flex items-center justify-between mb-2">
+                <h2 className="text-sm font-semibold">Register one of your cars</h2>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (!user || !user.id) return;
+                    setRegisterUserCarMessage(null);
+                    setUserCarsError(null);
+                    setUserCarsLoading(true);
+                    fetch(`http://localhost:4000/user/${encodeURIComponent(user.id)}/cars`, {
+                      credentials: 'include',
+                    })
+                      .then((res) => {
+                        if (!res.ok) throw new Error('Failed to load your cars');
+                        return res.json();
+                      })
+                      .then((data) => {
+                        setUserCars(Array.isArray(data.cars) ? data.cars : []);
+                      })
+                      .catch((err) => {
+                        setUserCarsError(err?.message || 'Unable to load your cars');
+                      })
+                      .finally(() => {
+                        setUserCarsLoading(false);
+                      });
+                  }}
+                  className="text-[0.7rem] px-2 py-1 rounded-md border border-slate-700 bg-slate-950/70 text-slate-200 hover:bg-slate-800/80"
+                >
+                  Refresh
+                </button>
+              </div>
+              <p className="text-[0.7rem] text-slate-400 mb-3">
+                Choose a car from your garage to register it into this race.
+              </p>
+              {userCarsLoading ? (
+                <p className="text-[0.75rem] text-slate-400">Loading your cars…</p>
+              ) : userCarsError ? (
+                <p className="text-[0.7rem] text-rose-300">{userCarsError}</p>
+              ) : userCars.length === 0 ? (
+                <p className="text-[0.75rem] text-slate-400">You have no cars yet. Create one from your dashboard first.</p>
+              ) : (
+                <form onSubmit={handleRegisterUserCarToRace} className="space-y-3 text-[0.7rem]">
+                  <div className="flex flex-col gap-1 max-w-xs">
+                    <label className="text-slate-300">Your car</label>
+                    <select
+                      value={selectedUserCarId}
+                      onChange={(e) => setSelectedUserCarId(e.target.value)}
+                      className="w-full rounded-md border border-slate-700 bg-slate-950/70 px-2 py-1 text-xs text-slate-100 focus:outline-none focus:ring-1 focus:ring-sky-500"
+                    >
+                      <option value="">Select one of your cars…</option>
+                      {userCars.map((car) => {
+                        const inRace = cars.some((existing) => existing.id === car.id);
+                        return (
+                          <option key={car.id} value={car.id} disabled={inRace}>
+                            {car.name} (acc {car.acceleration}, top {car.topSpeed}, handling {car.handling})
+                            {inRace ? ' — already in this race' : ''}
+                          </option>
+                        );
+                      })}
+                    </select>
+                  </div>
+                  {registerUserCarMessage && (
+                    <p className="text-[0.65rem] text-slate-300">{registerUserCarMessage}</p>
+                  )}
+                  <button
+                    type="submit"
+                    disabled={
+                      registeringUserCar ||
+                      !raceId ||
+                      raceStatus === 'running' ||
+                      raceStatus === 'finished'
+                    }
+                    className="inline-flex items-center justify-center rounded-md border border-emerald-500 bg-emerald-600 px-3 py-1 text-[0.7rem] font-medium text-white shadow-sm shadow-emerald-500/40 hover:bg-emerald-500 disabled:opacity-60"
+                  >
+                    {registeringUserCar ? 'Registering…' : 'Register car to this race'}
+                  </button>
+                </form>
+              )}
+            </section>
+          )}
         </main>
       )}
       {!readOnly && showRaceModal && (
