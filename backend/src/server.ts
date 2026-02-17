@@ -9,10 +9,14 @@ import { query } from './db';
 
 const DEFAULT_FRONTEND_ORIGIN = process.env.FRONTEND_ORIGIN || 'http://localhost:5173';
 const ALLOWED_ORIGINS = [
+  // React/Vite frontend
   DEFAULT_FRONTEND_ORIGIN,
   'http://127.0.0.1:5173',
   'http://localhost:4173',
   'http://127.0.0.1:4173',
+  // Vue/Nuxt frontend
+  'http://localhost:3000',
+  'http://127.0.0.1:3000',
 ];
 const SESSION_COOKIE_NAME = 'racer_session';
 
