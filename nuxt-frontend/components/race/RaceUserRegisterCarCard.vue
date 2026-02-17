@@ -1,0 +1,114 @@
+<script setup lang="ts">
+import Card from '~/components/ui/Card.vue'
+import Button from '~/components/ui/Button.vue'
+
+interface UserCar {
+  id: string
+  name: string
+  acceleration?: number
+  topSpeed?: number
+  handling?: number
+}
+
+interface CarInRace {
+  id: string
+}
+
+const props = defineProps<{
+  userCars: UserCar[]
+  userCarsLoading: boolean
+  userCarsError: string | null
+  selectedUserCarId: string
+  registerUserCarMessage: string | null
+  registeringUserCar: boolean
+  raceId: string
+  raceStatus: 'idle' | 'ready' | 'running' | 'finished'
+  carsInRace: CarInRace[]
+}>()
+
+const emit = defineEmits<{
+  (e: 'refresh-user-cars'): void
+  (e: 'update:selectedUserCarId', value: string): void
+  (e: 'register-user-car'): void
+}>()
+
+function onChange(e: Event) {
+  const target = e.target as HTMLSelectElement | null
+  if (!target) return
+  emit('update:selectedUserCarId', target.value)
+}
+
+function onSubmit(e: Event) {
+  e.preventDefault()
+  emit('register-user-car')
+}
+</script>
+
+<template>
+  <Card class="mt-4">
+    <div class="flex items-center justify-between mb-2">
+      <h2 class="text-sm font-semibold">Register one of your cars</h2>
+      <Button
+        type="button"
+        class="text-[0.7rem] px-2 py-1"
+        variant="secondary"
+        size="sm"
+        @click="emit('refresh-user-cars')"
+      >
+        Refresh
+      </Button>
+    </div>
+    <p class="text-[0.7rem] text-slate-400 mb-3">
+      Choose a car from your garage to register it into this race.
+    </p>
+    <p v-if="props.userCarsLoading" class="text-[0.75rem] text-slate-400">Loading your cars…</p>
+    <p v-else-if="props.userCarsError" class="text-[0.7rem] text-rose-300">{{ props.userCarsError }}</p>
+    <p
+      v-else-if="props.userCars.length === 0"
+      class="text-[0.75rem] text-slate-400"
+    >
+      You have no cars yet. Create one from your dashboard first.
+    </p>
+    <form
+      v-else
+      class="space-y-3 text-[0.7rem]"
+      @submit="onSubmit"
+    >
+      <div class="flex flex-col gap-1 max-w-xs">
+        <label class="text-slate-300">Your car</label>
+        <select
+          :value="props.selectedUserCarId"
+          class="w-full rounded-md border border-slate-700 bg-slate-950/70 px-2 py-1 text-xs text-slate-100 focus:outline-none focus:ring-1 focus:ring-sky-500"
+          @change="onChange"
+        >
+          <option value="">Select one of your cars…</option>
+          <option
+            v-for="car in props.userCars"
+            :key="car.id"
+            :value="car.id"
+            :disabled="props.carsInRace.some((existing) => existing.id === car.id)"
+          >
+            {{ car.name }} (acc {{ car.acceleration }}, top {{ car.topSpeed }}, handling {{ car.handling }})
+            <template v-if="props.carsInRace.some((existing) => existing.id === car.id)">
+              — already in this race
+            </template>
+          </option>
+        </select>
+      </div>
+      <p
+        v-if="props.registerUserCarMessage"
+        class="text-[0.65rem] text-slate-300"
+      >
+        {{ props.registerUserCarMessage }}
+      </p>
+      <Button
+        type="submit"
+        :disabled="props.registeringUserCar || !props.raceId || props.raceStatus === 'running' || props.raceStatus === 'finished'"
+        class="text-[0.7rem]"
+        size="sm"
+      >
+        {{ props.registeringUserCar ? 'Registering…' : 'Register car to this race' }}
+      </Button>
+    </form>
+  </Card>
+</template>

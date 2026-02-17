@@ -1,9 +1,13 @@
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, watch } from 'vue'
 import { useRouter } from '#app'
 import AppHeader from '~/components/AppHeader.vue'
-import Card from '~/components/ui/Card.vue'
-import Button from '~/components/ui/Button.vue'
+import AdminOverviewCard from '~/components/admin/AdminOverviewCard.vue'
+import AdminActiveRacesSection from '~/components/admin/AdminActiveRacesSection.vue'
+import AdminRaceDetailsSection from '~/components/admin/AdminRaceDetailsSection.vue'
+import AdminRaceHistorySection from '~/components/admin/AdminRaceHistorySection.vue'
+import AdminUsersCard from '~/components/admin/AdminUsersCard.vue'
+import AdminCarsCard from '~/components/admin/AdminCarsCard.vue'
 
 interface User {
   id: string
@@ -65,7 +69,7 @@ const selectedRaceDetails = ref<any | null>(null)
 const raceDetailsLoading = ref(false)
 const raceDetailsError = ref<string | null>(null)
 
-const newRaceDurationSeconds = ref(10)
+const newRaceDurationSeconds = ref<number | string>(10)
 const creatingRace = ref(false)
 const createRaceError = ref<string | null>(null)
 
@@ -259,241 +263,54 @@ watch(selectedRaceId, (id) => {
 
       <main class="grid lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] gap-6">
         <section class="space-y-4">
-          <Card>
-            <div class="mb-4 flex items-start justify-between gap-3">
-              <div>
-                <h2 class="text-lg font-semibold">Admin Dashboard</h2>
-                <p class="text-xs text-slate-400 mt-1">Overview of races, users, and cars.</p>
-              </div>
-              <Button
+          <AdminOverviewCard
+            :loading="loading"
+            :error="error"
+            :races="races"
+            :race-history="raceHistory"
+            :users-count="users.length"
+            :cars-count="cars.length"
+            :new-race-duration-seconds="newRaceDurationSeconds"
+            @refresh-admin-data="fetchAdminData"
+            @update:new-race-duration-seconds="(value) => (newRaceDurationSeconds = value)"
+          >
+            <template #create-race>
+              <button
                 type="button"
-                :disabled="loading"
-                variant="secondary"
-                size="sm"
-                class="text-[0.7rem] px-3 py-1"
-                @click="fetchAdminData"
+                class="inline-flex items-center justify-center rounded-md bg-sky-600 px-3 py-1 text-[0.8rem] font-medium text-white shadow-sm hover:bg-sky-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900 disabled:opacity-50 disabled:cursor-not-allowed"
+                :disabled="creatingRace"
+                @click="handleCreateRace"
               >
-                {{ loading ? 'Refreshing…' : 'Refresh' }}
-              </Button>
-            </div>
-
-            <div class="mb-4 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-2 text-[0.8rem]">
-              <div>
-                <label class="block text-[0.7rem] text-slate-400 uppercase tracking-widest mb-1">
-                  New race duration (seconds)
-                </label>
-                <input
-                  v-model="newRaceDurationSeconds"
-                  type="number"
-                  min="1"
-                  class="w-32 rounded-lg border border-slate-700 bg-slate-900/80 px-2 py-1 text-[0.8rem] text-slate-100 focus:outline-none focus:ring-1 focus:ring-sky-500"
-                />
-              </div>
-              <div class="flex flex-col items-start sm:items-end gap-1">
-                <Button
-                  type="button"
-                  :disabled="creatingRace"
-                  size="sm"
-                  class="text-[0.8rem]"
-                  @click="handleCreateRace"
-                >
-                  {{ creatingRace ? 'Creating race…' : 'Create race' }}
-                </Button>
-                <p v-if="createRaceError" class="text-[0.7rem] text-rose-300">{{ createRaceError }}</p>
-              </div>
-            </div>
-
-            <p v-if="error" class="text-[0.75rem] text-rose-300 mb-3">{{ error }}</p>
-
-            <div class="grid sm:grid-cols-3 gap-3 mb-4 text-sm">
-              <div class="rounded-xl bg-slate-950/60 px-3 py-3 ring-1 ring-slate-800/40">
-                <div class="text-[0.7rem] text-slate-400 uppercase tracking-widest mb-1">Active races</div>
-                <div class="text-2xl font-semibold text-slate-50">{{ races.length }}</div>
-              </div>
-              <div class="rounded-xl bg-slate-950/60 px-3 py-3 ring-1 ring-slate-800/40">
-                <div class="text-[0.7rem] text-slate-400 uppercase tracking-widest mb-1">Users</div>
-                <div class="text-2xl font-semibold text-slate-50">{{ users.length }}</div>
-              </div>
-              <div class="rounded-xl bg-slate-950/60 px-3 py-3 ring-1 ring-slate-800/40">
-                <div class="text-[0.7rem] text-slate-400 uppercase tracking-widest mb-1">Cars</div>
-                <div class="text-2xl font-semibold text-slate-50">{{ cars.length }}</div>
-              </div>
-            </div>
+                {{ creatingRace ? 'Creating race…' : 'Create race' }}
+              </button>
+              <p v-if="createRaceError" class="text-[0.7rem] text-rose-300 mt-1">{{ createRaceError }}</p>
+            </template>
 
             <div class="space-y-3">
-              <div>
-                <h3 class="text-xs font-semibold text-slate-300 uppercase tracking-widest mb-2">Active races (/admin/race)</h3>
-                <p v-if="races.length === 0" class="text-[0.8rem] text-slate-500">No active races right now.</p>
-                <ul v-else class="space-y-1 text-[0.8rem] max-h-40 overflow-auto pr-1">
-                  <li
-                    v-for="r in races"
-                    :key="r.raceId"
-                    class="flex items-center justify-between rounded-lg border border-slate-800/40 bg-slate-900/80 px-2 py-1.5 cursor-pointer hover:border-sky-500/60 hover:bg-slate-900/90 transition-colors"
-                    @click="selectedRaceId = r.raceId"
-                  >
-                    <div class="flex flex-col">
-                      <span class="font-mono text-[0.7rem] text-slate-300 truncate max-w-[14rem]">{{ r.raceId }}</span>
-                      <span class="text-[0.65rem] text-slate-500">
-                        Cars: {{ r.cars }} · Duration: {{ Math.round((r.durationMs || 0) / 1000) }}s
-                      </span>
-                    </div>
-                    <div class="flex items-center gap-2">
-                      <Button
-                        type="button"
-                        size="sm"
-                        variant="secondary"
-                        class="text-[0.65rem] px-2 py-0.5 rounded-full"
-                        @click.stop="handleViewRace(r.raceId, r.status)"
-                      >
-                        View
-                      </Button>
-                      <Button
-                        type="button"
-                        size="sm"
-                        variant="danger"
-                        class="text-[0.65rem] px-2 py-0.5 rounded-full"
-                        @click.stop="handleCloseRace(r.raceId)"
-                      >
-                        Close
-                      </Button>
-                      <Button
-                        type="button"
-                        size="sm"
-                        class="text-[0.65rem] px-2 py-0.5 rounded-full"
-                        @click.stop="handleStartRace(r.raceId)"
-                      >
-                        Start
-                      </Button>
-                      <span class="text-[0.65rem] px-2 py-0.5 rounded-full border border-slate-700 bg-slate-950/60 text-slate-300 capitalize">
-                        {{ r.status }}
-                      </span>
-                    </div>
-                  </li>
-                </ul>
-              </div>
+              <AdminActiveRacesSection
+                :races="races"
+                :selected-race-id="selectedRaceId"
+                @select-race="(id) => (selectedRaceId = id)"
+                @view-race="handleViewRace"
+                @close-race="handleCloseRace"
+                @start-race="handleStartRace"
+              />
 
-              <div v-if="selectedRaceId">
-                <h3 class="text-xs font-semibold text-slate-300 uppercase tracking-widest mb-2">
-                  Race details: {{ selectedRaceId }}
-                </h3>
-                <p v-if="raceDetailsLoading" class="text-[0.75rem] text-slate-400">Loading race details…</p>
-                <p v-else-if="raceDetailsError" class="text-[0.75rem] text-rose-300">{{ raceDetailsError }}</p>
-                <p
-                  v-else-if="!selectedRaceDetails || !Array.isArray(selectedRaceDetails.cars) || selectedRaceDetails.cars.length === 0"
-                  class="text-[0.75rem] text-slate-400"
-                >
-                  No cars registered for this race yet.
-                </p>
-                <ul
-                  v-else
-                  class="space-y-1 text-[0.8rem] max-h-40 overflow-auto pr-1"
-                >
-                  <li
-                    v-for="car in selectedRaceDetails.cars"
-                    :key="car.id"
-                    class="flex items-center justify-between rounded-lg border border-slate-800/40 bg-slate-900/80 px-2 py-1.5"
-                  >
-                    <div class="flex items-center gap-2">
-                      <span
-                        class="w-2 h-6 rounded-full"
-                        :style="{ backgroundColor: car.color }"
-                      />
-                      <div class="flex flex-col">
-                        <span class="text-slate-200">{{ car.name }}</span>
-                        <span v-if="car.ownerName" class="text-[0.65rem] text-slate-500">User: {{ car.ownerName }}</span>
-                      </div>
-                    </div>
-                    <div class="text-[0.65rem] text-slate-400 flex gap-2">
-                      <span>Acc: {{ car.attributes?.acceleration }}</span>
-                      <span>Top: {{ car.attributes?.topSpeed }}</span>
-                      <span>Handling: {{ car.attributes?.handling }}</span>
-                    </div>
-                  </li>
-                </ul>
-              </div>
+              <AdminRaceDetailsSection
+                :selected-race-id="selectedRaceId"
+                :race-details-loading="raceDetailsLoading"
+                :race-details-error="raceDetailsError"
+                :selected-race-details="selectedRaceDetails"
+              />
 
-              <div>
-                <h3 class="text-xs font-semibold text-slate-300 uppercase tracking-widest mb-2">Recent races (DB history)</h3>
-                <p v-if="!raceHistory || raceHistory.length === 0" class="text-[0.8rem] text-slate-500">
-                  No races have been recorded yet.
-                </p>
-                <ul v-else class="space-y-1 text-[0.8rem] max-h-40 overflow-auto pr-1">
-                  <li
-                    v-for="r in raceHistory"
-                    :key="r.id"
-                    class="flex items-center justify-between rounded-lg border border-slate-800/40 bg-slate-900/80 px-2 py-1.5"
-                  >
-                    <div class="flex flex-col">
-                      <span class="font-mono text-[0.7rem] text-slate-300 truncate max-w-[14rem]">{{ r.id }}</span>
-                      <span class="text-[0.65rem] text-slate-500">
-                        Duration: {{ Math.round((r.durationMs || 0) / 1000) }}s · Created:
-                        {{ r.createdAt ? new Date(r.createdAt).toLocaleString() : '—' }}
-                        <template v-if="r.finishedAt">
-                          · Finished: {{ new Date(r.finishedAt).toLocaleString() }}
-                        </template>
-                      </span>
-                      <span v-if="r.createdByName" class="text-[0.65rem] text-slate-500">Admin: {{ r.createdByName }}</span>
-                    </div>
-                    <span class="text-[0.65rem] px-2 py-0.5 rounded-full border border-slate-700 bg-slate-950/60 text-slate-300 capitalize">
-                      {{ r.status }}
-                    </span>
-                  </li>
-                </ul>
-              </div>
+              <AdminRaceHistorySection :race-history="raceHistory" />
             </div>
-          </Card>
+          </AdminOverviewCard>
         </section>
 
         <section class="space-y-4">
-          <div class="bg-slate-900/60 border border-slate-800/70 rounded-2xl p-4 sm:p-5 shadow-xl shadow-slate-950/50">
-            <div class="flex items-center justify-between mb-3">
-              <h2 class="text-lg font-semibold">Users</h2>
-            </div>
-            <p v-if="users.length === 0" class="text-sm text-slate-500">No users found.</p>
-            <ul v-else class="space-y-1 text-[0.8rem] max-h-40 overflow-auto pr-1">
-              <li
-                v-for="u in users"
-                :key="u.id"
-                class="flex items-center justify-between rounded-lg border border-slate-800/40 bg-slate-900/80 px-2 py-1.5"
-              >
-                <div class="flex flex-col">
-                  <span class="text-slate-200">{{ u.name }}</span>
-                  <span v-if="u.username" class="text-[0.65rem] text-slate-500">{{ u.username }}</span>
-                </div>
-                <span class="text-[0.65rem] uppercase tracking-widest text-slate-400">{{ u.role || 'user' }}</span>
-              </li>
-            </ul>
-          </div>
-
-          <div class="bg-slate-900/60 border border-slate-800/70 rounded-2xl p-4 sm:p-5 shadow-xl shadow-slate-950/50">
-            <div class="flex items-center justify-between mb-3">
-              <h2 class="text-lg font-semibold">Cars</h2>
-            </div>
-            <p v-if="cars.length === 0" class="text-sm text-slate-500">No cars found.</p>
-            <ul v-else class="space-y-1 text-[0.8rem] max-h-40 overflow-auto pr-1">
-              <li
-                v-for="c in cars"
-                :key="c.id"
-                class="flex items-center justify-between rounded-lg border border-slate-800/40 bg-slate-900/80 px-2 py-1.5"
-              >
-                <div class="flex items-center gap-2">
-                  <span
-                    class="w-2 h-6 rounded-full"
-                    :style="{ backgroundColor: c.color }"
-                  />
-                  <div class="flex flex-col">
-                    <span class="text-slate-200">{{ c.name }}</span>
-                    <span class="text-[0.65rem] text-slate-500">User: {{ c.userId }}</span>
-                  </div>
-                </div>
-                <div class="text-[0.65rem] text-slate-400 flex gap-2">
-                  <span>Acc: {{ c.acceleration.toFixed(1) }}</span>
-                  <span>Top: {{ c.topSpeed.toFixed(0) }}</span>
-                  <span>Handling: {{ c.handling.toFixed(2) }}</span>
-                </div>
-              </li>
-            </ul>
-          </div>
+          <AdminUsersCard :users="users" />
+          <AdminCarsCard :cars="cars" />
         </section>
       </main>
     </div>

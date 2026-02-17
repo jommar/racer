@@ -1,9 +1,13 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { useRoute, useRouter } from '#app'
-import Card from '~/components/ui/Card.vue'
-import Button from '~/components/ui/Button.vue'
-import TextField from '~/components/ui/TextField.vue'
+import RaceHeader from '~/components/race/RaceHeader.vue'
+import RaceStatusAndCarsCard from '~/components/race/RaceStatusAndCarsCard.vue'
+import RaceResultsCard from '~/components/race/RaceResultsCard.vue'
+import RaceAdminControlsCard from '~/components/race/RaceAdminControlsCard.vue'
+import RaceAdminRegisterCarCard from '~/components/race/RaceAdminRegisterCarCard.vue'
+import RaceUserRegisterCarCard from '~/components/race/RaceUserRegisterCarCard.vue'
+import RaceLogsCard from '~/components/race/RaceLogsCard.vue'
 
 interface User {
   id: string
@@ -79,7 +83,7 @@ function attachSocketListeners() {
   })
 
   $socket.on('disconnect', () => {
-    handleSocketStatus(false, socketError.value)
+    handleSocketStatus(false, null)
   })
 
   $socket.on('connect_error', (err: any) => {
@@ -296,8 +300,7 @@ async function fetchAdminCars() {
   }
 }
 
-function handleRegisterUserCarToRace(e: Event) {
-  e.preventDefault()
+function handleRegisterUserCarToRace() {
   registerUserCarMessage.value = null
 
   if (!raceId.value) {
@@ -349,8 +352,7 @@ function handleRegisterUserCarToRace(e: Event) {
   }
 }
 
-function handleRegisterAdminCarToRace(e: Event) {
-  e.preventDefault()
+function handleRegisterAdminCarToRace() {
   registerAdminCarMessage.value = null
 
   if (!raceId.value) {
@@ -419,7 +421,12 @@ onMounted(async () => {
   if (!user.value) return
 
   attachSocketListeners()
-  if (raceId.value) {
+  if ($socket.connected) {
+    handleSocketStatus(true, null)
+    if (raceId.value) {
+      $socket.emit('race:join', { raceId: raceId.value })
+    }
+  } else if (raceId.value) {
     $socket.emit('race:join', { raceId: raceId.value })
   }
 
@@ -436,312 +443,77 @@ onBeforeUnmount(() => {
 <template>
   <div class="min-h-screen text-slate-50 flex justify-center items-start py-8 px-4 overflow-y-auto">
     <div class="w-full max-w-5xl space-y-6">
-      <header class="flex items-center justify-between">
-        <div>
-          <h1 class="text-xl font-semibold tracking-tight">Race viewer</h1>
-          <p class="text-xs text-slate-400 mt-1">
-            Live view for race ID
-            <span class="font-mono break-all">{{ raceId }}</span>
-          </p>
-        </div>
-        <div class="flex flex-col items-end gap-1 text-xs">
-          <span
-            class="inline-flex items-center gap-2 rounded-full px-3 py-1 border text-xs font-medium"
-            :class="socketConnected
-              ? 'border-emerald-500/40 bg-emerald-500/10 text-emerald-300'
-              : 'border-rose-500/40 bg-rose-500/10 text-rose-300'"
-          >
-            <span
-              class="w-2 h-2 rounded-full"
-              :class="socketConnected ? 'bg-emerald-400' : 'bg-rose-400'"
-            />
-            {{ socketConnected ? 'Connected' : 'Disconnected' }}
-          </span>
-          <span v-if="socketError" class="text-[0.65rem] text-rose-300 max-w-[14rem] truncate">
-            {{ socketError }}
-          </span>
-        </div>
-      </header>
+      <RaceHeader
+        :race-id="raceId"
+        :socket-connected="socketConnected"
+        :socket-error="socketError"
+      />
 
-      <Card>
-        <div v-if="raceError" class="mb-4 rounded-lg border border-rose-500/40 bg-rose-950/40 px-3 py-2 text-xs text-rose-100">
-          <span v-if="raceId">
-            Race with ID <span class="font-mono break-all">{{ raceId }}</span> was not found.
-          </span>
-          <span v-else>Race not found.</span>
-        </div>
+      <RaceStatusAndCarsCard
+        :race-id="raceId"
+        :race-status="raceStatus"
+        :duration-seconds="durationSeconds"
+        :countdown="countdown"
+        :cars="cars"
+        :progress-by-car="progressByCar"
+        :replay-loading="replayLoading"
+        :race-error="raceError"
+        @replay-current-race="replayCurrentRace"
+      />
 
-        <div class="flex items-center justify-between mb-3 text-xs text-slate-300">
-          <div class="flex items-center gap-3">
-            <span>Status: <span class="capitalize">{{ raceStatus }}</span></span>
-            <span v-if="durationSeconds">Duration: {{ durationSeconds }}s</span>
-            <span v-if="countdown !== null">Remaining: {{ countdown }}s</span>
-          </div>
-          <div class="flex items-center gap-2">
-            <Button
-              type="button"
-              size="sm"
-              class="text-[0.7rem]"
-              :disabled="replayLoading || !raceId"
-              @click="replayCurrentRace"
-            >
-              Replay this race
-            </Button>
-          </div>
-        </div>
+      <RaceResultsCard
+        :race-status="raceStatus"
+        :results="results"
+        :cars="cars"
+      />
 
-        <div v-if="cars.length === 0" class="text-[0.8rem] text-slate-400">
-          Waiting for cars to be added to this race.
-        </div>
-        <ul v-else class="space-y-2">
-          <li
-            v-for="car in cars"
-            :key="car.id"
-            class="rounded-lg border border-slate-800/60 bg-slate-900/80 px-3 py-2 text-xs flex flex-col gap-1"
-          >
-            <div class="flex items-center justify-between">
-              <div class="flex items-center gap-2">
-                <span
-                  class="w-2 h-5 rounded-full"
-                  :style="{ backgroundColor: car.color }"
-                />
-                <span class="text-slate-100">{{ car.name }}</span>
-                <span v-if="car.ownerName" class="text-[0.65rem] text-slate-500">({{ car.ownerName }})</span>
-              </div>
-              <span class="text-[0.65rem] text-slate-400">
-                {{ Math.round((progressByCar[car.id] || 0) * 100) }}%
-              </span>
-            </div>
-            <div class="h-2 rounded-full bg-slate-800/80 overflow-hidden">
-              <div
-                class="h-full rounded-full bg-gradient-to-r from-sky-500 to-emerald-400 transition-all duration-150"
-                :style="{ width: `${Math.min(100, Math.max(0, Math.round((progressByCar[car.id] || 0) * 100)))}%` }"
-              />
-            </div>
-          </li>
-        </ul>
-      </Card>
+      <RaceAdminControlsCard
+        v-if="user && user.role === 'admin'"
+        :race-id="raceId"
+        :race-status="raceStatus"
+        @start-race="handleStartRace"
+        @close-race="handleCloseRace"
+      />
 
-      <Card class="mt-4">
-        <div class="flex items-center justify-between mb-3">
-          <h2 class="text-sm font-semibold">Results</h2>
-          <p class="text-[0.7rem] text-slate-400">Computed entirely on the backend.</p>
-        </div>
+      <RaceAdminRegisterCarCard
+        v-if="user && user.role === 'admin'"
+        :admin-cars="adminCars"
+        :admin-cars-loading="adminCarsLoading"
+        :admin-cars-error="adminCarsError"
+        :selected-admin-car-id="selectedAdminCarId"
+        :register-admin-car-message="registerAdminCarMessage"
+        :registering-admin-car="registeringAdminCar"
+        :race-id="raceId"
+        :race-status="raceStatus"
+        :cars-in-race="cars"
+        @refresh-admin-cars="fetchAdminCars"
+        @update:selected-admin-car-id="(value) => (selectedAdminCarId = value)"
+        @register-admin-car="handleRegisterAdminCarToRace"
+      />
 
-        <p v-if="raceStatus !== 'finished'" class="text-sm text-slate-500">
-          Once the race finishes, results will appear here.
-        </p>
-        <template v-else>
-          <div
-            v-if="results && results.length"
-            class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 text-sm"
-          >
-            <div
-              v-for="r in results"
-              :key="r.carId"
-              class="flex flex-col gap-2 rounded-xl border border-slate-800/40 bg-slate-900/80 px-3 py-2"
-            >
-              <div class="flex items-center gap-3">
-                <span class="w-6 text-center text-xs font-semibold text-amber-300">
-                  #{{ r.rank }}
-                </span>
-                <div
-                  class="w-2 h-8 rounded-full"
-                  :style="{ backgroundColor: (cars.find((c) => c.id === r.carId)?.color) || '#64748b' }"
-                />
-                <div>
-                  <div class="font-semibold text-slate-100 text-sm truncate max-w-[8rem]">{{ r.name }}</div>
-                  <div class="text-[0.7rem] text-slate-400">
-                    Final speed: {{ r.finalSpeed.toFixed(1) }}
-                  </div>
-                  <div
-                    v-if="typeof r.finishTimeMs === 'number'"
-                    class="text-[0.7rem] text-slate-400"
-                  >
-                    Time: {{ (r.finishTimeMs / 1000).toFixed(2) }}s
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-          <p v-else class="text-sm text-slate-500">No results available.</p>
-        </template>
-      </Card>
+      <RaceUserRegisterCarCard
+        v-if="user && user.role === 'user'"
+        :user-cars="userCars"
+        :user-cars-loading="userCarsLoading"
+        :user-cars-error="userCarsError"
+        :selected-user-car-id="selectedUserCarId"
+        :register-user-car-message="registerUserCarMessage"
+        :registering-user-car="registeringUserCar"
+        :race-id="raceId"
+        :race-status="raceStatus"
+        :cars-in-race="cars"
+        @refresh-user-cars="fetchUserCars"
+        @update:selected-user-car-id="(value) => (selectedUserCarId = value)"
+        @register-user-car="handleRegisterUserCarToRace"
+      />
 
-      <Card v-if="user && user.role === 'admin'" class="mt-4">
-        <div class="flex items-center justify-between">
-          <div>
-            <h2 class="text-sm font-semibold">Admin controls for this race</h2>
-            <p class="text-[0.7rem] text-slate-400 mt-0.5">
-              Start or close this race directly from the race view.
-            </p>
-          </div>
-          <div class="flex items-center gap-2">
-            <Button
-              type="button"
-              size="sm"
-              class="text-[0.7rem]"
-              :disabled="!raceId || raceStatus === 'running' || raceStatus === 'finished'"
-              @click="handleStartRace"
-            >
-              Start race
-            </Button>
-            <Button
-              type="button"
-              size="sm"
-              variant="danger"
-              class="text-[0.7rem]"
-              :disabled="!raceId"
-              @click="handleCloseRace"
-            >
-              Close race
-            </Button>
-          </div>
-        </div>
-      </Card>
-
-      <Card v-if="user && user.role === 'admin'" class="mt-4">
-        <div class="flex items-center justify-between mb-2">
-          <h2 class="text-sm font-semibold">Register any car</h2>
-          <Button
-            type="button"
-            class="text-[0.7rem] px-2 py-1"
-            variant="secondary"
-            size="sm"
-            @click="fetchAdminCars"
-          >
-            Refresh
-          </Button>
-        </div>
-        <p class="text-[0.7rem] text-slate-400 mb-3">
-          Pick any car from the database and register it into this race.
-        </p>
-        <p v-if="adminCarsLoading" class="text-[0.75rem] text-slate-400">Loading cars…</p>
-        <p v-else-if="adminCarsError" class="text-[0.7rem] text-rose-300">{{ adminCarsError }}</p>
-        <p v-else-if="adminCars.length === 0" class="text-[0.75rem] text-slate-400">No cars are available in the database yet.</p>
-        <form
-          v-else
-          class="space-y-3 text-[0.7rem]"
-          @submit="handleRegisterAdminCarToRace"
-        >
-          <div class="flex flex-col gap-1 max-w-xs">
-            <label class="text-slate-300">Car</label>
-            <select
-              v-model="selectedAdminCarId"
-              class="w-full rounded-md border border-slate-700 bg-slate-950/70 px-2 py-1 text-xs text-slate-100 focus:outline-none focus:ring-1 focus:ring-sky-500"
-            >
-              <option value="">Select a car…</option>
-              <option
-                v-for="car in adminCars"
-                :key="car.id"
-                :value="car.id"
-                :disabled="cars.some((existing) => existing.id === car.id)"
-              >
-                {{ car.name }} (acc {{ car.acceleration }}, top {{ car.topSpeed }}, handling {{ car.handling }})
-                <template v-if="cars.some((existing) => existing.id === car.id)">
-                  — already in this race
-                </template>
-              </option>
-            </select>
-          </div>
-          <p v-if="registerAdminCarMessage" class="text-[0.65rem] text-slate-300">{{ registerAdminCarMessage }}</p>
-          <Button
-            type="submit"
-            :disabled="registeringAdminCar || !raceId || raceStatus === 'running' || raceStatus === 'finished'"
-            class="text-[0.7rem]"
-            size="sm"
-          >
-            {{ registeringAdminCar ? 'Registering…' : 'Register car to this race' }}
-          </Button>
-        </form>
-      </Card>
-
-      <Card v-if="user && user.role === 'user'" class="mt-4">
-        <div class="flex items-center justify-between mb-2">
-          <h2 class="text-sm font-semibold">Register one of your cars</h2>
-          <Button
-            type="button"
-            class="text-[0.7rem] px-2 py-1"
-            variant="secondary"
-            size="sm"
-            @click="fetchUserCars"
-          >
-            Refresh
-          </Button>
-        </div>
-        <p class="text-[0.7rem] text-slate-400 mb-3">
-          Choose a car from your garage to register it into this race.
-        </p>
-        <p v-if="userCarsLoading" class="text-[0.75rem] text-slate-400">Loading your cars…</p>
-        <p v-else-if="userCarsError" class="text-[0.7rem] text-rose-300">{{ userCarsError }}</p>
-        <p v-else-if="userCars.length === 0" class="text-[0.75rem] text-slate-400">
-          You have no cars yet. Create one from your dashboard first.
-        </p>
-        <form
-          v-else
-          class="space-y-3 text-[0.7rem]"
-          @submit="handleRegisterUserCarToRace"
-        >
-          <div class="flex flex-col gap-1 max-w-xs">
-            <label class="text-slate-300">Your car</label>
-            <select
-              v-model="selectedUserCarId"
-              class="w-full rounded-md border border-slate-700 bg-slate-950/70 px-2 py-1 text-xs text-slate-100 focus:outline-none focus:ring-1 focus:ring-sky-500"
-            >
-              <option value="">Select one of your cars…</option>
-              <option
-                v-for="car in userCars"
-                :key="car.id"
-                :value="car.id"
-                :disabled="cars.some((existing) => existing.id === car.id)"
-              >
-                {{ car.name }} (acc {{ car.acceleration }}, top {{ car.topSpeed }}, handling {{ car.handling }})
-                <template v-if="cars.some((existing) => existing.id === car.id)">
-                  — already in this race
-                </template>
-              </option>
-            </select>
-          </div>
-          <p v-if="registerUserCarMessage" class="text-[0.65rem] text-slate-300">{{ registerUserCarMessage }}</p>
-          <Button
-            type="submit"
-            :disabled="registeringUserCar || !raceId || raceStatus === 'running' || raceStatus === 'finished'"
-            class="text-[0.7rem]"
-            size="sm"
-          >
-            {{ registeringUserCar ? 'Registering…' : 'Register car to this race' }}
-          </Button>
-        </form>
-      </Card>
-
-      <Card class="mt-4">
-        <h2 class="text-sm font-semibold mb-2">Recent race logs</h2>
-        <p v-if="replayLoading" class="text-[0.75rem] text-slate-400">Loading logs…</p>
-        <p v-else-if="replayError" class="text-[0.75rem] text-rose-300">{{ replayError }}</p>
-        <p v-else-if="replayLogs.length === 0" class="text-[0.75rem] text-slate-400">No logs available yet.</p>
-        <ul v-else class="space-y-1 text-[0.75rem] max-h-40 overflow-auto pr-1">
-          <li
-            v-for="log in replayLogs"
-            :key="log.file"
-            class="flex items-center justify-between rounded-lg border border-slate-800/40 bg-slate-900/80 px-2 py-1.5"
-          >
-            <div class="flex flex-col">
-              <span class="font-mono text-[0.65rem] text-slate-300 truncate max-w-[14rem]">{{ log.file }}</span>
-              <span class="text-[0.65rem] text-slate-500">
-                Race: {{ log.raceId }} · Lobby: {{ log.lobbyId }}
-              </span>
-            </div>
-            <Button
-              type="button"
-              size="sm"
-              class="text-[0.65rem] px-2 py-0.5"
-              @click="startReplay(log.file)"
-            >
-              Replay
-            </Button>
-          </li>
-        </ul>
-      </Card>
+      <RaceLogsCard
+        v-if="user && user.role === 'admin'"
+        :replay-loading="replayLoading"
+        :replay-error="replayError"
+        :replay-logs="replayLogs"
+        @replay-log="startReplay"
+      />
     </div>
   </div>
 </template>
