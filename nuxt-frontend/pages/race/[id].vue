@@ -3,6 +3,7 @@ import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { useRoute, useRouter } from '#app'
 import RaceHeader from '~/components/race/RaceHeader.vue'
 import RaceStatusAndCarsCard from '~/components/race/RaceStatusAndCarsCard.vue'
+import RaceTrack2D from '~/components/race/RaceTrack2D.vue'
 import RaceResultsCard from '~/components/race/RaceResultsCard.vue'
 import RaceAdminControlsCard from '~/components/race/RaceAdminControlsCard.vue'
 import RaceAdminRegisterCarCard from '~/components/race/RaceAdminRegisterCarCard.vue'
@@ -156,9 +157,10 @@ async function fetchReplayLogs() {
   try {
     replayLoading.value = true
     replayError.value = null
-    const res = await fetch('http://localhost:4000/logs')
-    if (!res.ok) throw new Error('Failed to load logs')
-    const data = await res.json()
+    const { $api } = useNuxtApp()
+    const res = await $api.get('/logs')
+    if (res.status !== 200) throw new Error('Failed to load logs')
+    const data = res.data
     const logs = Array.isArray(data.logs) ? data.logs : []
     replayLogs.value = logs.sort((a: any, b: any) => {
       const ta = typeof a.startedAt === 'number' ? a.startedAt : 0
@@ -176,9 +178,10 @@ async function startReplay(file: string) {
   stopReplay()
   try {
     replayError.value = null
-    const res = await fetch(`http://localhost:4000/logs/${encodeURIComponent(file)}`)
-    if (!res.ok) throw new Error('Failed to load log')
-    const log = await res.json()
+    const { $api } = useNuxtApp()
+    const res = await $api.get(`/logs/${encodeURIComponent(file)}`)
+    if (res.status !== 200) throw new Error('Failed to load log')
+    const log = res.data
     const {
       cars: logCars = [],
       ticks = [],
@@ -245,14 +248,13 @@ function replayCurrentRace() {
 
 async function loadUser() {
   try {
-    const res = await fetch('http://localhost:4000/auth/me', {
-      credentials: 'include',
-    })
-    if (!res.ok) {
+    const { $api } = useNuxtApp()
+    const res = await $api.get('/auth/me')
+    if (res.status !== 200) {
       router.push(`/login?redirect=${encodeURIComponent(route.fullPath)}`)
       return
     }
-    const data = await res.json()
+    const data = res.data
     const me = data?.user as User | undefined
     if (!me) {
       router.push(`/login?redirect=${encodeURIComponent(route.fullPath)}`)
@@ -269,11 +271,10 @@ async function fetchUserCars() {
   try {
     userCarsLoading.value = true
     userCarsError.value = null
-    const res = await fetch(`http://localhost:4000/user/${encodeURIComponent(user.value.id)}/cars`, {
-      credentials: 'include',
-    })
-    if (!res.ok) throw new Error('Failed to load your cars')
-    const data = await res.json()
+    const { $api } = useNuxtApp()
+    const res = await $api.get(`/user/${encodeURIComponent(user.value.id)}/cars`)
+    if (res.status !== 200) throw new Error('Failed to load your cars')
+    const data = res.data
     userCars.value = Array.isArray(data.cars) ? data.cars : []
   } catch (err: any) {
     userCarsError.value = err?.message || 'Unable to load your cars'
@@ -287,11 +288,10 @@ async function fetchAdminCars() {
   try {
     adminCarsLoading.value = true
     adminCarsError.value = null
-    const res = await fetch('http://localhost:4000/admin/cars', {
-      credentials: 'include',
-    })
-    if (!res.ok) throw new Error('Failed to load cars')
-    const data = await res.json()
+    const { $api } = useNuxtApp()
+    const res = await $api.get('/admin/cars')
+    if (res.status !== 200) throw new Error('Failed to load cars')
+    const data = res.data
     adminCars.value = Array.isArray(data.cars) ? data.cars : []
   } catch (err: any) {
     adminCarsError.value = err?.message || 'Unable to load cars'
@@ -447,6 +447,12 @@ onBeforeUnmount(() => {
         :race-id="raceId"
         :socket-connected="socketConnected"
         :socket-error="socketError"
+      />
+
+      <RaceTrack2D
+        :cars="cars"
+        :progress-by-car="progressByCar"
+        :race-status="raceStatus"
       />
 
       <RaceStatusAndCarsCard
