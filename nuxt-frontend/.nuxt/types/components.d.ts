@@ -22,15 +22,16 @@ interface _GlobalComponents {
   AdminRaceDetailsSection: typeof import("../../components/admin/AdminRaceDetailsSection.vue")['default']
   AdminRaceHistorySection: typeof import("../../components/admin/AdminRaceHistorySection.vue")['default']
   AdminUsersCard: typeof import("../../components/admin/AdminUsersCard.vue")['default']
-  RaceRace3DView: typeof import("../../components/race/Race3DView.vue")['default']
   RaceAdminControlsCard: typeof import("../../components/race/RaceAdminControlsCard.vue")['default']
   RaceAdminRegisterCarCard: typeof import("../../components/race/RaceAdminRegisterCarCard.vue")['default']
+  RaceCar2D: typeof import("../../components/race/RaceCar2D.vue")['default']
   RaceHeader: typeof import("../../components/race/RaceHeader.vue")['default']
   RaceLogsCard: typeof import("../../components/race/RaceLogsCard.vue")['default']
   RaceResultsCard: typeof import("../../components/race/RaceResultsCard.vue")['default']
   RaceStatusAndCarsCard: typeof import("../../components/race/RaceStatusAndCarsCard.vue")['default']
   RaceTrack2D: typeof import("../../components/race/RaceTrack2D.vue")['default']
   RaceUserRegisterCarCard: typeof import("../../components/race/RaceUserRegisterCarCard.vue")['default']
+  RaceSprites: typeof import("../../components/race/raceSprites")['default']
   UiButton: typeof import("../../components/ui/Button.vue")['default']
   UiCard: typeof import("../../components/ui/Card.vue")['default']
   UiTextField: typeof import("../../components/ui/TextField.vue")['default']
@@ -69,15 +70,16 @@ interface _GlobalComponents {
   LazyAdminRaceDetailsSection: LazyComponent<typeof import("../../components/admin/AdminRaceDetailsSection.vue")['default']>
   LazyAdminRaceHistorySection: LazyComponent<typeof import("../../components/admin/AdminRaceHistorySection.vue")['default']>
   LazyAdminUsersCard: LazyComponent<typeof import("../../components/admin/AdminUsersCard.vue")['default']>
-  LazyRaceRace3DView: LazyComponent<typeof import("../../components/race/Race3DView.vue")['default']>
   LazyRaceAdminControlsCard: LazyComponent<typeof import("../../components/race/RaceAdminControlsCard.vue")['default']>
   LazyRaceAdminRegisterCarCard: LazyComponent<typeof import("../../components/race/RaceAdminRegisterCarCard.vue")['default']>
+  LazyRaceCar2D: LazyComponent<typeof import("../../components/race/RaceCar2D.vue")['default']>
   LazyRaceHeader: LazyComponent<typeof import("../../components/race/RaceHeader.vue")['default']>
   LazyRaceLogsCard: LazyComponent<typeof import("../../components/race/RaceLogsCard.vue")['default']>
   LazyRaceResultsCard: LazyComponent<typeof import("../../components/race/RaceResultsCard.vue")['default']>
   LazyRaceStatusAndCarsCard: LazyComponent<typeof import("../../components/race/RaceStatusAndCarsCard.vue")['default']>
   LazyRaceTrack2D: LazyComponent<typeof import("../../components/race/RaceTrack2D.vue")['default']>
   LazyRaceUserRegisterCarCard: LazyComponent<typeof import("../../components/race/RaceUserRegisterCarCard.vue")['default']>
+  LazyRaceSprites: LazyComponent<typeof import("../../components/race/raceSprites")['default']>
   LazyUiButton: LazyComponent<typeof import("../../components/ui/Button.vue")['default']>
   LazyUiCard: LazyComponent<typeof import("../../components/ui/Card.vue")['default']>
   LazyUiTextField: LazyComponent<typeof import("../../components/ui/TextField.vue")['default']>

@@ -22,6 +22,15 @@ interface CarProgress {
   progress: number
 }
 
+interface CarAppearance {
+  wheelSize?: 'small' | 'medium' | 'large'
+  wheelStyle?: 'solid' | 'rim'
+  hasFlag?: boolean
+  flagColor?: string
+  number?: string | number
+  spriteKey?: string
+}
+
 interface CarInRace {
   id: string
   name: string
@@ -30,6 +39,8 @@ interface CarInRace {
   topSpeed?: number
   handling?: number
   ownerName?: string
+  laneIndex?: number
+  appearance?: CarAppearance
 }
 
 const route = useRoute()
@@ -70,6 +81,40 @@ const registerAdminCarMessage = ref<string | null>(null)
 const socketConnected = ref(false)
 const socketError = ref<string | null>(null)
 
+function withAppearance(rawCars: any[]): CarInRace[] {
+  return (rawCars || []).map((car: any, index: number) => {
+    const base: CarInRace = {
+      id: String(car.id),
+      name: String(car.name ?? `Car ${index + 1}`),
+      color: String(car.color ?? '#38bdf8'),
+      acceleration: car.acceleration,
+      topSpeed: car.topSpeed,
+      handling: car.handling,
+      ownerName: car.ownerName,
+      laneIndex: typeof car.laneIndex === 'number' ? car.laneIndex : undefined,
+    }
+
+    const wheelSizeCycle: CarAppearance['wheelSize'][] = ['small', 'medium', 'large']
+    const wheelSize = wheelSizeCycle[index % wheelSizeCycle.length]
+    const wheelStyle: CarAppearance['wheelStyle'] = index % 2 === 0 ? 'rim' : 'solid'
+
+    const palette = ['#22c55e', '#f97316', '#3b82f6', '#eab308', '#a855f7']
+    const flagColor = palette[index % palette.length]
+
+    base.appearance = {
+      wheelSize,
+      wheelStyle,
+      hasFlag: true,
+      flagColor,
+      number: index + 1,
+      spriteKey: car.spriteKey || (car.appearance && car.appearance.spriteKey) || 'car1',
+      ...(car.appearance || {}),
+    }
+
+    return base
+  })
+}
+
 function handleSocketStatus(connected: boolean, error: string | null) {
   socketConnected.value = connected
   socketError.value = error
@@ -96,7 +141,7 @@ function attachSocketListeners() {
     raceError.value = null
     raceStatus.value = state.status
     if (Array.isArray(state.cars)) {
-      cars.value = state.cars
+      cars.value = withAppearance(state.cars)
     }
     if (typeof state.durationMs === 'number') {
       durationSeconds.value = Math.round(state.durationMs / 1000)
@@ -188,7 +233,7 @@ async function startReplay(file: string) {
       results: logResults = [],
     } = log || {}
 
-    cars.value = Array.isArray(logCars) ? logCars : []
+    cars.value = Array.isArray(logCars) ? withAppearance(logCars) : []
     results.value = Array.isArray(logResults) ? logResults : []
     progressByCar.value = {}
 
@@ -341,6 +386,7 @@ function handleRegisterUserCarToRace() {
         topSpeed: Number(car.topSpeed) || 1,
         handling: Math.min(1, Math.max(0, Number(car.handling) || 0.5)),
       },
+      spriteKey: car.spriteKey,
     }
 
     $socket.emit('car:add', { raceId: raceId.value, car: payloadCar })
@@ -392,6 +438,7 @@ function handleRegisterAdminCarToRace() {
         topSpeed: Number(car.topSpeed) || 1,
         handling: Math.min(1, Math.max(0, Number(car.handling) || 0.5)),
       },
+      spriteKey: car.spriteKey,
     }
 
     $socket.emit('car:add', { raceId: raceId.value, car: payloadCar })
@@ -401,6 +448,17 @@ function handleRegisterAdminCarToRace() {
   } finally {
     registeringAdminCar.value = false
   }
+}
+
+function handleRemoveCarFromRace(carId: string) {
+  if (!raceId.value) {
+    return
+  }
+  if (raceStatus.value === 'running' || raceStatus.value === 'finished') {
+    return
+  }
+
+  $socket.emit('car:remove', { raceId: raceId.value, carId })
 }
 
 function handleStartRace() {
@@ -464,7 +522,9 @@ onBeforeUnmount(() => {
         :progress-by-car="progressByCar"
         :replay-loading="replayLoading"
         :race-error="raceError"
+        :can-remove-cars="!!(user && user.role === 'admin')"
         @replay-current-race="replayCurrentRace"
+        @remove-car="handleRemoveCarFromRace"
       />
 
       <RaceResultsCard

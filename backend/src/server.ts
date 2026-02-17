@@ -237,6 +237,28 @@ io.on('connection', (socket) => {
   });
 
   /**
+   * Remove an existing car from a specific race lobby.
+   *
+   * This is only effective before the race has started.
+   */
+  socket.on('car:remove', (payload: { raceId: string; carId: string }) => {
+    const raceId = payload?.raceId;
+    const ctx = getRace(raceId);
+    if (!ctx) {
+      socket.emit('race:error', { raceId, message: 'Race not found' });
+      return;
+    }
+
+    const carId = payload?.carId;
+    if (!carId) {
+      return;
+    }
+
+    ctx.manager.removeCar(carId);
+    emitRaceStateToRoom(ctx.id, ctx.manager);
+  });
+
+  /**
    * Start the race using the current cars and configured duration
    * for the specified race lobby.
    */
@@ -590,7 +612,7 @@ app.get('/user/:userId/cars', async (req, res) => {
   const userId = req.params.userId;
   try {
     const sql =
-      'SELECT id, user_id as "userId", name, color, acceleration, top_speed as "topSpeed", handling, created_at as "createdAt" FROM cars WHERE user_id = $1 ORDER BY created_at ASC';
+      'SELECT id, user_id as "userId", name, color, acceleration, top_speed as "topSpeed", handling, sprite_key as "spriteKey", created_at as "createdAt" FROM cars WHERE user_id = $1 ORDER BY created_at ASC';
     const result = await query<{
       id: string;
       userId: string;
@@ -599,6 +621,7 @@ app.get('/user/:userId/cars', async (req, res) => {
       acceleration: number;
       topSpeed: number;
       handling: number;
+      spriteKey: string | null;
       createdAt: string;
     }>(sql, [userId]);
     res.json({ cars: result.rows });
@@ -611,7 +634,7 @@ app.get('/user/:userId/cars', async (req, res) => {
 // Create a new car for a given user.
 app.post('/user/:userId/cars', async (req, res) => {
   const userId = req.params.userId;
-  const { name, color, acceleration, topSpeed, handling } = req.body ?? {};
+  const { name, color, acceleration, topSpeed, handling, spriteKey } = req.body ?? {};
 
   if (!name || typeof name !== 'string' || !color || typeof color !== 'string') {
     res.status(400).json({ error: 'Missing or invalid name/color' });
@@ -631,7 +654,7 @@ app.post('/user/:userId/cars', async (req, res) => {
 
   try {
     const sql =
-      'INSERT INTO cars (id, user_id, name, color, acceleration, top_speed, handling) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id, user_id as "userId", name, color, acceleration, top_speed as "topSpeed", handling, created_at as "createdAt"';
+      'INSERT INTO cars (id, user_id, name, color, acceleration, top_speed, handling, sprite_key) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id, user_id as "userId", name, color, acceleration, top_speed as "topSpeed", handling, sprite_key as "spriteKey", created_at as "createdAt"';
     const result = await query<{
       id: string;
       userId: string;
@@ -640,8 +663,9 @@ app.post('/user/:userId/cars', async (req, res) => {
       acceleration: number;
       topSpeed: number;
       handling: number;
+      spriteKey: string | null;
       createdAt: string;
-    }>(sql, [carId, userId, name, color, acc, top, hand]);
+    }>(sql, [carId, userId, name, color, acc, top, hand, spriteKey ?? 'car1']);
     res.status(201).json({ car: result.rows[0] });
   } catch (err) {
     console.error('Error creating car', err);
@@ -666,7 +690,7 @@ app.get('/admin/users', async (_req, res) => {
 app.get('/admin/cars', async (_req, res) => {
   try {
     const sql =
-      'SELECT id, user_id as "userId", name, color, acceleration, top_speed as "topSpeed", handling, created_at as "createdAt" FROM cars ORDER BY created_at DESC';
+      'SELECT id, user_id as "userId", name, color, acceleration, top_speed as "topSpeed", handling, sprite_key as "spriteKey", created_at as "createdAt" FROM cars ORDER BY created_at DESC';
     const result = await query<{
       id: string;
       userId: string;
@@ -675,6 +699,7 @@ app.get('/admin/cars', async (_req, res) => {
       acceleration: number;
       topSpeed: number;
       handling: number;
+      spriteKey: string | null;
       createdAt: string;
     }>(sql, []);
     res.json({ cars: result.rows });

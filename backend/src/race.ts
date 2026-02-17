@@ -25,6 +25,10 @@ export type Car = {
   /** Optional owner information when cars come from a registered user. */
   ownerUserId?: string;
   ownerName?: string;
+  /** Optional sprite key used by the frontend to pick a car skin. */
+  spriteKey?: string;
+  /** 0-based vertical lane index used for consistent track placement/replay. */
+  laneIndex?: number;
 };
 
 /**
@@ -112,6 +116,15 @@ export class RaceManager {
   /** External lobby ID (UUID) so logs can be tied back to /race/:id. */
   private lobbyId: string | null = null;
 
+  /**
+   * Maximum number of vertical lanes used by the frontend track.
+   *
+   * Keep this in sync with the MAX_LANES constant in the Nuxt
+   * RaceTrack2D component so that lane indices map to the same
+   * visual slots for live view and replay.
+   */
+  private static readonly MAX_LANES = 8;
+
   /** Associate this manager with a specific lobby UUID. */
   setLobbyId(id: string) {
     this.lobbyId = id;
@@ -154,9 +167,69 @@ export class RaceManager {
     if (this.state.cars.some((existing) => existing.id === car.id)) {
       return;
     }
-    this.state.cars = [...this.state.cars, car];
+    // Assign a lane index for this race if one was not provided.
+    // We try to distribute cars across a fixed number of visual lanes
+    // so that their vertical positions can vary between races, while
+    // staying stable once registered (and during replay).
+    let assignedLane: number;
+    if (typeof car.laneIndex === 'number') {
+      assignedLane = Math.max(0, Math.min(RaceManager.MAX_LANES - 1, car.laneIndex));
+    } else {
+      const usedLanes = new Set<number>();
+      for (const existing of this.state.cars) {
+        if (typeof existing.laneIndex === 'number') {
+          usedLanes.add(existing.laneIndex);
+        }
+      }
+      const available: number[] = [];
+      for (let i = 0; i < RaceManager.MAX_LANES; i++) {
+        if (!usedLanes.has(i)) {
+          available.push(i);
+        }
+      }
+      if (available.length > 0) {
+        const idx = Math.floor(Math.random() * available.length);
+        assignedLane = available[idx];
+      } else {
+        // Fallback: if all lanes are used, wrap around in a stable way.
+        assignedLane = this.state.cars.length % RaceManager.MAX_LANES;
+      }
+    }
+
+    const carWithLane: Car = { ...car, laneIndex: assignedLane };
+
+    this.state.cars = [...this.state.cars, carWithLane];
     if (this.state.status === 'idle') {
       this.state.status = 'ready';
+    }
+  }
+
+  /**
+   * Remove a car from the race lobby by id.
+   *
+   * Cars can only be removed while the race has not started yet.
+   */
+  removeCar(carId: string) {
+    if (this.state.status === 'running' || this.state.status === 'finished') {
+      return;
+    }
+
+    if (!this.state.cars.some((car) => car.id === carId)) {
+      return;
+    }
+
+    // Remove the car from the lobby.
+    this.state.cars = this.state.cars.filter((car) => car.id !== carId);
+
+    // Clear any derived state for this car if it existed.
+    this.performance.delete(carId);
+    this.progress.delete(carId);
+    this.finishTimes.delete(carId);
+    this.speeds.delete(carId);
+
+    // If there are no cars left, move back to idle.
+    if (this.state.cars.length === 0 && this.state.status === 'ready') {
+      this.state.status = 'idle';
     }
   }
 

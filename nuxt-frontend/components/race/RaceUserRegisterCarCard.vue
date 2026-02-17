@@ -8,6 +8,7 @@ interface UserCar {
   acceleration?: number
   topSpeed?: number
   handling?: number
+   spriteKey?: string
 }
 
 interface CarInRace {

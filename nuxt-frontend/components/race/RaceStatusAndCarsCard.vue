@@ -21,10 +21,13 @@ const props = defineProps<{
   progressByCar: Record<string, number>
   replayLoading: boolean
   raceError: string | null
+  /** Whether the current viewer is allowed to remove cars. */
+  canRemoveCars?: boolean
 }>()
 
 const emit = defineEmits<{
   (e: 'replay-current-race'): void
+  (e: 'remove-car', carId: string): void
 }>()
 </script>
 
@@ -77,9 +80,21 @@ const emit = defineEmits<{
             <span class="text-slate-100">{{ car.name }}</span>
             <span v-if="car.ownerName" class="text-[0.65rem] text-slate-500">({{ car.ownerName }})</span>
           </div>
-          <span class="text-[0.65rem] text-slate-400">
-            {{ Math.round((props.progressByCar[car.id] || 0) * 100) }}%
-          </span>
+          <div class="flex items-center gap-2">
+            <span class="text-[0.65rem] text-slate-400">
+              {{ Math.round((props.progressByCar[car.id] || 0) * 100) }}%
+            </span>
+            <Button
+              v-if="props.canRemoveCars && (props.raceStatus === 'idle' || props.raceStatus === 'ready')"
+              type="button"
+              size="sm"
+              variant="secondary"
+              class="text-[0.6rem] px-2 py-0.5 text-rose-300 hover:text-rose-200 hover:bg-rose-900/40"
+              @click="emit('remove-car', car.id)"
+            >
+              Remove
+            </Button>
+          </div>
         </div>
         <div class="h-2 rounded-full bg-slate-800/80 overflow-hidden">
           <div
