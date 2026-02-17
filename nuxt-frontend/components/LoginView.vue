@@ -21,20 +21,16 @@ const error = ref<string | null>(null)
 const loading = ref(false)
 
 async function handleSubmit() {
-    console.log(123)
   if (!username.value.trim() || !password.value.trim()) return
-  console.log(321)
   loading.value = true
   error.value = null
   try {
-    // Ensure we use the browser fetch (not a server-side polyfill).
-    const res = await window.fetch('http://localhost:4000/auth/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',
-      body: JSON.stringify({ username: username.value.trim(), password: password.value }),
+    const { $api } = useNuxtApp()
+    const res = await $api.post('/auth/login', {
+      username: username.value.trim(),
+      password: password.value,
     })
-    if (!res.ok) {
+    if (res.status !== 200) {
       if (res.status === 401) {
         error.value = 'Invalid username or password'
       } else {
@@ -42,7 +38,7 @@ async function handleSubmit() {
       }
       return
     }
-    const data = await res.json()
+    const data = res.data
     if (data && data.user) {
       username.value = ''
       password.value = ''

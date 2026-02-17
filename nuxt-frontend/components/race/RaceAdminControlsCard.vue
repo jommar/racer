@@ -19,7 +19,7 @@ const emit = defineEmits<{
       <div>
         <h2 class="text-sm font-semibold">Admin controls for this race</h2>
         <p class="text-[0.7rem] text-slate-400 mt-0.5">
-          Start or close this race directly from the race view.
+          Start, re-run, or close this race directly from the race view.
         </p>
       </div>
       <div class="flex items-center gap-2">
@@ -27,10 +27,10 @@ const emit = defineEmits<{
           type="button"
           size="sm"
           class="text-[0.7rem]"
-          :disabled="!props.raceId || props.raceStatus === 'running' || props.raceStatus === 'finished'"
+          :disabled="!props.raceId || props.raceStatus === 'running'"
           @click="emit('start-race')"
         >
-          Start race
+          {{ props.raceStatus === 'finished' ? 'Re-run race' : 'Start race' }}
         </Button>
         <Button
           type="button"

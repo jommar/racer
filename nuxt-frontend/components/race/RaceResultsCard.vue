@@ -61,7 +61,7 @@ const props = defineProps<{
                 v-if="typeof r.finishTimeMs === 'number'"
                 class="text-[0.7rem] text-slate-400"
               >
-                Time: {{ (r.finishTimeMs / 1000).toFixed(2) }}s
+                Time: {{ (r.finishTimeMs / 1000).toFixed(5) }}s
               </div>
             </div>
           </div>
