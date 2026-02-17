@@ -20,6 +20,9 @@ CREATE TABLE IF NOT EXISTS cars (
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+-- Ensure cosmetic sprite key exists for cars (idempotent).
+ALTER TABLE cars ADD COLUMN IF NOT EXISTS sprite_key TEXT;
+
 -- Races created in the system. These can be live (active in memory)
 -- or historical (past races that no longer exist in memory).
 CREATE TABLE IF NOT EXISTS races (
@@ -46,11 +49,11 @@ ON CONFLICT (id) DO UPDATE SET
   role = EXCLUDED.role;
 
 -- Sample cars
-INSERT INTO cars (id, user_id, name, color, acceleration, top_speed, handling)
+INSERT INTO cars (id, user_id, name, color, acceleration, top_speed, handling, sprite_key)
 VALUES
-  ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', '11111111-1111-1111-1111-111111111111', 'Alice GT', '#ef4444', 6.5, 220, 0.8),
-  ('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', '11111111-1111-1111-1111-111111111111', 'Alice Drift', '#3b82f6', 7.5, 210, 0.9),
-  ('cccccccc-cccc-cccc-cccc-cccccccccccc', '22222222-2222-2222-2222-222222222222', 'Bob Cruiser', '#22c55e', 5.0, 200, 0.7)
+  ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', '11111111-1111-1111-1111-111111111111', 'Alice GT', '#ef4444', 6.5, 220, 0.8, 'car1'),
+  ('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', '11111111-1111-1111-1111-111111111111', 'Alice Drift', '#3b82f6', 7.5, 210, 0.9, 'car1'),
+  ('cccccccc-cccc-cccc-cccc-cccccccccccc', '22222222-2222-2222-2222-222222222222', 'Bob Cruiser', '#22c55e', 5.0, 200, 0.7, 'car1')
 ON CONFLICT (id) DO NOTHING;
 
 -- No static seed data for races; they will be created at runtime
