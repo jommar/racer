@@ -1,7 +1,5 @@
 import { io, type Socket } from 'socket.io-client'
-import { defineNuxtPlugin } from '#app'
-
-const SOCKET_URL = 'http://localhost:4000'
+import { defineNuxtPlugin, useRuntimeConfig } from '#app'
 
 declare module '#app' {
   interface NuxtApp {
@@ -16,6 +14,8 @@ declare module 'vue' {
 }
 
 export default defineNuxtPlugin(() => {
+  const config = useRuntimeConfig()
+  const SOCKET_URL = config.public.apiBase || 'http://localhost:4000'
   const socket: Socket = io(SOCKET_URL, {
     autoConnect: true,
   })

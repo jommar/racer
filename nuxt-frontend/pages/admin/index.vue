@@ -92,36 +92,25 @@ async function fetchAdminData() {
   try {
     loading.value = true
     error.value = null
+    const { $api } = useNuxtApp()
     const [racesRes, usersRes, carsRes] = await Promise.all([
-      fetch('http://localhost:4000/admin/race', { credentials: 'include' }),
-      fetch('http://localhost:4000/admin/users', { credentials: 'include' }),
-      fetch('http://localhost:4000/admin/cars', { credentials: 'include' }),
+      $api.get('/admin/race'),
+      $api.get('/admin/users'),
+      $api.get('/admin/cars'),
     ])
 
-    if (!racesRes.ok || !usersRes.ok || !carsRes.ok) {
-      throw new Error('Failed to load admin data')
-    }
-
-    const [racesJson, usersJson, carsJson] = await Promise.all([
-      racesRes.json(),
-      usersRes.json(),
-      carsRes.json(),
-    ])
+    const racesJson = racesRes.data
+    const usersJson = usersRes.data
+    const carsJson = carsRes.data
 
     races.value = Array.isArray(racesJson.races) ? racesJson.races : []
     users.value = Array.isArray(usersJson.users) ? usersJson.users : []
     cars.value = Array.isArray(carsJson.cars) ? carsJson.cars : []
 
     try {
-      const historyRes = await fetch('http://localhost:4000/admin/race/history', {
-        credentials: 'include',
-      })
-      if (historyRes.ok) {
-        const historyJson = await historyRes.json()
-        raceHistory.value = Array.isArray(historyJson.races) ? historyJson.races : []
-      } else {
-        raceHistory.value = []
-      }
+      const historyRes = await $api.get('/admin/race/history')
+      const historyJson = historyRes.data
+      raceHistory.value = Array.isArray(historyJson.races) ? historyJson.races : []
     } catch {
       raceHistory.value = []
     }
@@ -140,11 +129,9 @@ async function fetchRaceDetails(id: string | null) {
   try {
     raceDetailsLoading.value = true
     raceDetailsError.value = null
-    const res = await fetch(`http://localhost:4000/admin/race/${encodeURIComponent(id)}`, {
-      credentials: 'include',
-    })
-    if (!res.ok) throw new Error('Failed to load race details')
-    selectedRaceDetails.value = await res.json()
+    const { $api } = useNuxtApp()
+    const res = await $api.get(`/admin/race/${encodeURIComponent(id)}`)
+    selectedRaceDetails.value = res.data
   } catch (err: any) {
     raceDetailsError.value = err?.message || 'Unable to load race details'
     selectedRaceDetails.value = null
@@ -196,14 +183,13 @@ function handleCreateRace() {
 
 async function loadUser() {
   try {
-    const res = await fetch('http://localhost:4000/auth/me', {
-      credentials: 'include',
-    })
-    if (!res.ok) {
+    const { $api } = useNuxtApp()
+    const res = await $api.get('/auth/me')
+    if (res.status !== 200) {
       router.push('/login?redirect=/admin')
       return
     }
-    const data = await res.json()
+    const data = res.data
     const me = data?.user as User | undefined
     if (!me || me.role !== 'admin') {
       router.push('/user')
@@ -217,10 +203,8 @@ async function loadUser() {
 
 async function handleLogout() {
   try {
-    await fetch('http://localhost:4000/auth/logout', {
-      method: 'POST',
-      credentials: 'include',
-    })
+    const { $api } = useNuxtApp()
+    await $api.post('/auth/logout')
   } catch {
     // ignore
   }

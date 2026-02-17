@@ -6,6 +6,11 @@ export default defineNuxtConfig({
   modules: ['@nuxtjs/tailwindcss'],
   css: ['~/assets/css/tailwind.css'],
   compatibilityDate: '2026-02-17',
+  runtimeConfig: {
+    public: {
+      apiBase: process.env.NUXT_PUBLIC_API_BASE || 'http://localhost:4000',
+    },
+  },
   typescript: {
     strict: true,
     typeCheck: true

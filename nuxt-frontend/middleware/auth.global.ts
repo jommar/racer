@@ -1,4 +1,4 @@
-import { defineNuxtRouteMiddleware, navigateTo, useRequestURL } from '#app'
+import { defineNuxtRouteMiddleware, navigateTo, useNuxtApp } from '#app'
 
 export default defineNuxtRouteMiddleware(async (to) => {
   // Do not guard the login page itself.
@@ -22,14 +22,9 @@ export default defineNuxtRouteMiddleware(async (to) => {
   }
 
   try {
-    const res = await fetch('http://localhost:4000/auth/me', {
-      credentials: 'include',
-    })
-    if (!res.ok) {
-      const redirect = encodeURIComponent(to.fullPath || '/')
-      return navigateTo(`/login?redirect=${redirect}`)
-    }
-    const data = await res.json()
+    const { $api } = useNuxtApp()
+    const res = await $api.get('/auth/me')
+    const data = res.data
     if (!data || !data.user) {
       const redirect = encodeURIComponent(to.fullPath || '/')
       return navigateTo(`/login?redirect=${redirect}`)
