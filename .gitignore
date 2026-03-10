@@ -1,0 +1,36 @@
+# Node.js / NestJS
+node_modules/
+dist/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.env
+.env.test
+.env.production
+
+# Flutter
+.dart_tool/
+.packages
+.pub-cache/
+.pub/
+build/
+ios/Pods/
+android/app/key.properties
+*.keystore
+*.jks
+
+# Docker
+.docker/
+data/ # Common name for PostgreSQL volume mapping
+
+# IDEs / Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# Gemini CLI
+gemini.sessions
+.gemini/tmp/
