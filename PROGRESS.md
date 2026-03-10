@@ -36,6 +36,8 @@
 - **Documentation & Mandates:**
     - Updated AI Agent Mandates in `GEMINI.md` to require documentation sync after every task.
     - Added git commit mandate (Rule 6) to AI Agent Mandates.
+    - Created `TASKS.md` for granular task tracking with timestamps.
+    - Updated Rule 1 and Rule 3 in `GEMINI.md` to include `TASKS.md` sync.
     - Created root `.gitignore` file for first commit.
     - Performed initial repository commit with 59 files.
 - **Security & Performance:**

@@ -5,8 +5,9 @@
 - **Database:** PostgreSQL schema defined, Indexed, Dockerized.
 - **Testing:** 22/22 Unit tests passing (`npm test`).
 - **Postman:** `backend/racing-app.postman_collection.json` ready for manual API validation.
-- **Documentation:** Updated `GEMINI.md` mandates for documentation sync and mandatory git commits.
-- **Git:** Initial commit completed (59 files staged and committed).
+- **Documentation:** Updated `GEMINI.md` mandates for documentation sync (including new `TASKS.md`) and mandatory git commits.
+- **Task Tracking:** Created `TASKS.md` for granular task and timestamp tracking.
+- **Git:** Initial commit and versioned API commits completed.
 - **Security:** Global Rate Limiting implemented in Backend.
 - **API:** Implemented `/v1` versioning for all routes. Postman collection updated.
 
