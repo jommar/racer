@@ -3,34 +3,32 @@
 ## 📜 Core Mandates (MUST FOLLOW)
 1.  **Context Efficiency:** Always read `GEMINI.md` and `LOG.md` at the start of a session.
 2.  **Documentation Sync:** After **EVERY** task, you MUST update the `LOG.md` file (Progress, Tasks, and Next Steps).
-3.  **Component Reusability:** Do not write raw Tailwind for common UI patterns. Use/Expand the components in `src/components/ui/core.tsx`.
+3.  **Component Reusability:** Use/Expand components in `src/components/ui/core.tsx`. Refer to the Library section below.
 4.  **Testing:** Backend features require `npm test` verification.
-5.  **Version Control:** Perform a git commit with a descriptive message after every task and doc sync.
+5.  **Version Control:** Commit with a descriptive message after every task and doc sync.
 
 ---
 
-## 🛠️ Architectural Constraints
-- **Backend:** NestJS (Port 4000). Use Atomic Transactions for all Auction/Marketplace logic.
-- **Frontend:** React + Vite (Port 5174). Use HTML5 Canvas for the race track.
-- **Database:** PostgreSQL (Port 5433).
-- **Real-time:** Socket.io via NestJS Gateways.
+## 🛠️ Architectural & Domain Constraints
+- **Stack:** NestJS (Port 4000), React + Vite (Port 5174), PostgreSQL (Port 5433).
+- **Real-time:** Socket.io for live racing; Canvas for rendering.
+- **Race Logic:** Outcomes are determined by a tick-based probabilistic formula (Base Stats + Random Weight).
+- **Inventory Rule:** Items listed in the Auction House **MUST NOT** appear in the player's Garage inventory.
+- **Atomic Ops:** All Marketplace/Auction trades MUST use database transactions.
 
 ---
 
 ## 🎨 Component Library Reference
-Detailed usage for `src/components/ui/core.tsx`:
-
-- **`Button`**: Variants: `primary`, `secondary`, `outline`, `ghost`, `danger`.
-- **`Card`**: Standard glassmorphic container with `glass` and `hover` props.
-- **`Input`**: Icon-supported text fields with validation `error` support.
-- **`StatsProgress`**: Performance bars with `potential` boost visualization.
-- **`Modal`**: Animated overlay for confirmations.
-- **`Tabs`**: Segmented control for view switching.
-- **`PageContainer`**: Standard layout wrapper with Navbar.
+- **`Button`**: `primary`, `secondary`, `outline`, `ghost`, `danger`.
+- **`Card`**: Glassmorphic container with `glass` and `hover` toggles.
+- **`Input`**: Icon-supported with `error` validation states.
+- **`StatsProgress`**: Bars with `potential` boost visualization.
+- **`Modal`**: Animated overlay for critical actions.
+- **`Tabs`**: Segmented control for switching sub-views.
 
 ---
 
 ## 🔧 Development Workflow
-- **Backend Start:** `cd backend && npm run start:dev` (Autokills port 4000).
-- **Frontend Start:** `cd frontend && npm run dev`.
-- **DB Setup:** Run `./setup-db.sh` to reset the PostgreSQL container and volumes.
+- **Backend Start:** `cd backend && npm run start:dev` (Automatically clears port 4000).
+- **Frontend Start:** `cd frontend && npm run dev` (Runs on 5174).
+- **DB Setup:** Run `./setup-db.sh` to reset the PostgreSQL environment.
