@@ -3,64 +3,40 @@
 ## ✅ Completed (Backend & Architecture)
 - **Infrastructure:**
     - Project structure (Frontend/Backend folders).
-    - Docker-compose for PostgreSQL.
-    - NestJS scaffolding with TypeScript.
+    - Docker-compose for PostgreSQL (Port 5433).
+    - NestJS scaffolding with TypeScript (Port 4000).
     - Global Exception Filters & Logging Interceptors.
-    - Database Indexing for performance.
-    - Health Check endpoint.
+    - **Fixed Compilation Errors:** Corrected import paths in `RacesGateway` and resolved missing properties in `Race` entity.
+    - **Port Conflict Resolution:** Implemented `prestart:dev` hook to clear port 4000 automatically.
 - **Authentication:**
     - Email/Password Registration & Login.
     - JWT-based authentication.
-    - Role-based Access Control (User, Admin, Superadmin).
-    - Superadmin auto-seeding from `.env`.
-- **Car & Equipment Management:**
-    - Shop system for limited-time car/item availability.
-    - Garage system (User inventory).
-    - "One free car" logic for new users.
-    - Equipment slot logic (Engine, Tires, Body, Nitro).
-    - Item equipping/unequipping with stat snapshots.
-- **Auction House:**
-    - Atomic transactions for listing and buying items.
-    - Instant trade logic with currency exchange.
-    - Duplication prevention (items removed from inventory when listed).
+    - **Auth Sync:** Unified token naming (`access_token`) and added auto-redirect on 401 errors.
+    - **Profile Endpoint:** Implemented `GET /auth/profile`.
 - **Race Mechanics:**
     - Tick-based probabilistic winning formula.
-    - Track length to Frame conversion logic.
-    - Participant stat snapshotting (Audit-ready).
-    - Compressed frame storage for replays.
-    - Real-time streaming logic via WebSockets (Gateways).
-- **Testing & Tooling:**
-    - Unit tests for Auth, Cars, Auctions, and Races services.
-    - Postman Collection (`backend/racing-app.postman_collection.json`) for manual API testing.
-    - Detailed cURL documentation for core flows.
-- **Documentation & Mandates:**
-    - Updated AI Agent Mandates in `GEMINI.md` to require documentation sync after every task.
-    - Added git commit mandate (Rule 6) to AI Agent Mandates.
-    - Created `TASKS.md` for granular task tracking with timestamps.
-    - Updated Rule 1 and Rule 3 in `GEMINI.md` to include `TASKS.md` sync.
-    - Created root `.gitignore` file for first commit.
-    - Performed initial repository commit with 59 files.
-- **Security & Performance:**
-    - Global Rate Limiting (10 requests per minute) implemented using `@nestjs/throttler`.
-- **API Versioning:**
-    - Implemented `/v1` global prefix for all backend routes.
-    - Updated Postman collection to reflect versioned routes.
-## ✅ Completed (Backend & Architecture)
-...
-- **Frontend (React):**
-    - Project initialization (Vite 8 + React 19 + TypeScript).
-    - Tailwind CSS v4 Configuration.
-    - Core Layout (Navbar & Dashboard).
-    - High-performance RaceTrack component (HTML5 Canvas).
-    - Mock data integration for look-and-feel validation.
-- **Real-time Synchronization:**
-    - Frontend-to-Backend Socket.io handshake and event handling.
-- **Advanced Logic:**
-    - Auction House notifications (Real-time alerts when item sold).
-    - Automatic Race Scheduling (Background cron jobs for scheduled starts).
+    - **Races API:** Implemented `GET /races` to list all circuits.
+    - **Data Model Refinement:** Added `name` and `participants` relationship to `Race` entity.
 
-## 🔍 For Refinement
-- **Race Formula Balance:** Testing the probabilistic weights to ensure "puncher's chance" for base cars feels fair.
-- **Auction House Search:** Adding filters for stats (e.g., "Show only engines with speed > 5").
-- **Asset Management:** Refining how admins pick from "templates" (dynamic asset mapping).
-- **Security:** Implementing Refresh Tokens.
+## ✅ Completed (Frontend - React)
+- **Core Setup:**
+    - Project initialization (Vite 8 + React 19 + TypeScript).
+    - Tailwind CSS v4 Configuration with custom racing theme.
+    - Global animated background and glassmorphism styling.
+- **Component Library:**
+    - Created `src/components/ui/core.tsx` with reusable `Button`, `Card`, `Input`, `Badge`, `Modal`, `StatsProgress`, `Tabs`, and `Skeleton`.
+    - Documented library in `frontend/COMPONENTS.md`.
+- **Integrated Pages:**
+    - **Login/Register:** Connected to NestJS Auth.
+    - **Dashboard:** Real-time profile, balance, and race list integration.
+    - **Admin Dashboard:** Integrated with Backend Race Registry.
+    - **Race Simulator:** Baseline engine for local load testing (up to 500 cars).
+
+## ⏳ In Progress / Not Done
+- **Garage UI:** Detailed car management and part equipping (Next Up).
+- **Shop/Marketplace:** UI for buying items and cars.
+- **Real-time Synchronization:**
+    - Connecting `RaceTrack` Canvas to live Socket.io events.
+- **Advanced Logic:**
+    - Auction House notifications.
+    - Automatic Race Scheduling.

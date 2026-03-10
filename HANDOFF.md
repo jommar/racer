@@ -1,27 +1,20 @@
-# Next Session Start Guide
+# Handoff: NitroDash Development
 
 ## Current State
-- **Backend:** 100% Core Features Complete (Auth, Cars, Shop, Equipment, Auctions, Races, Replays).
-- **Database:** PostgreSQL schema defined, Indexed, Dockerized.
-- **Testing:** 22/22 Unit tests passing (`npm test`).
-- **Postman:** `backend/racing-app.postman_collection.json` ready for manual API validation.
-- **Documentation:** Updated `GEMINI.md` mandates for documentation sync (including new `TASKS.md`) and mandatory git commits.
-- **Task Tracking:** Created `TASKS.md` for granular task and timestamp tracking.
-- **Git:** Initial commit and versioned API commits completed.
-- **Security:** Global Rate Limiting implemented in Backend.
-- **API:** Implemented `/v1` versioning for all routes. Postman collection updated.
+- **Architecture:** Project successfully migrated to React (Vite) for better web-native performance. Backend is NestJS + PostgreSQL.
+- **Port Mapping:** 
+  - Backend: `4000`
+  - Frontend: `5174`
+  - Database: `5433`
+- **Integration:** Auth and Dashboard are fully connected to real data. The system automatically handles port conflicts and stale tokens.
+- **Components:** A reusable library exists in `src/components/ui/core.tsx` and is documented in `frontend/COMPONENTS.md`.
 
-## Immediate Next Task: Flutter Implementation
-Flutter CLI is not installed on the system. Flutter project initialization in the `frontend` directory needs to be performed on a machine with Flutter installed.
+## Immediate Next Steps
+1.  **Garage UI:** Implement the inventory view where users can see their cars and equip parts. This should use the `Tabs`, `StatsProgress`, and `Modal` components.
+2.  **Real-time Races:** Connect the existing `RaceTrack` canvas to the `RacesGateway` via Socket.io to visualize actual backend race ticks.
+3.  **Marketplace:** Build the Shop UI to allow users to spend their starting currency.
 
-### 1. Flutter Setup (User Side)
-Ensure `flutter` is installed and run `flutter create --platforms web,android,ios .` in the `frontend` directory.
-
-### 2. Core Frontend Modules to Build:
-- **`AuthService`**: Integration with NestJS `/auth/login` and `/auth/register`.
-- **`RacingPainter`**: Use the pre-computed frames from the backend to draw car movement on a canvas.
-- **`SocketService`**: Handshake with the backend for real-time `raceFrame` events.
-- **`Dashboard`**: Garage view (Car list) and Marketplace view (Shop/Auction House).
-
-### 3. Verification
-Run the backend with `docker-compose up -d` and `npm run start:dev` to test the frontend integration.
+## Critical Notes
+- Use `npm run start:dev` in the backend; it now includes an automatic port-clearing hook.
+- When adding new components, update `frontend/COMPONENTS.md`.
+- All API calls should use the `api` service in `frontend/src/services/api.ts` to ensure token handling and 401 redirects.

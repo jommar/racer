@@ -2,13 +2,12 @@
 
 | Task Description | Status | Added | Started | Finished | Last Worked | Notes |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| Implement API versioning (`/v1`) | ✅ Completed | 2026-03-10 | 2026-03-10 14:30 | 2026-03-10 14:45 | 2026-03-10 14:45 | Updated `main.ts` and Postman collection. |
-| Implement Global Rate Limiting | ✅ Completed | 2026-03-10 | 2026-03-10 14:15 | 2026-03-10 14:25 | 2026-03-10 14:25 | Used `@nestjs/throttler` in `app.module.ts`. |
-| Create root `.gitignore` | ✅ Completed | 2026-03-10 | 2026-03-10 14:00 | 2026-03-10 14:05 | 2026-03-10 14:05 | Covers NestJS, Flutter, and Docker. |
-| Initialize React Frontend (Vite) | ✅ Completed | 2026-03-11 | 2026-03-11 10:00 | 2026-03-11 10:30 | 2026-03-11 10:30 | Switching from Flutter to React for better web-native performance. |
-| Implement Auth UI (Login/Register) | 📅 Pending | 2026-03-11 | - | - | - | Integration with NestJS Auth. |
-| Create Race Track (Canvas MVP) | ✅ Completed | 2026-03-11 | 2026-03-11 10:15 | 2026-03-11 10:30 | 2026-03-11 10:30 | Visualizing race frames with HTML5 Canvas. |
-| Build Dashboard MVP (Look & Feel) | ✅ Completed | 2026-03-11 | 2026-03-11 10:15 | 2026-03-11 10:30 | 2026-03-11 10:30 | High-quality racing dashboard with mock data. |
-| Update AI Agent Mandates (GEMINI.md) | ✅ Completed | 2026-03-10 | 2026-03-10 14:50 | 2026-03-10 14:55 | 2026-03-10 14:55 | Added Rules 3-6 for doc sync and commits. |
-| Setup TASKS.md & Sync Rules | ✅ Completed | 2026-03-10 | 2026-03-10 15:00 | 2026-03-10 15:05 | 2026-03-10 15:05 | Initialized task tracker and updated GEMINI.md core rules. |
-| Add Refresh Token Logic | 📅 Pending | 2026-03-10 | - | - | - | Backend security refinement. |
+| Initialize React Frontend (Vite) | ✅ Completed | 2026-03-11 | 2026-03-11 10:00 | 2026-03-11 10:30 | 2026-03-11 10:30 | Migrated from Flutter. |
+| Build Core Component Library | ✅ Completed | 2026-03-11 | 2026-03-11 12:00 | 2026-03-11 12:45 | 2026-03-11 12:45 | See `frontend/COMPONENTS.md`. |
+| Implement Auth UI & Integration | ✅ Completed | 2026-03-11 | 2026-03-11 11:00 | 2026-03-11 13:00 | 2026-03-11 13:00 | Login/Register with auto-redirect. |
+| Fix Backend Race Data Model | ✅ Completed | 2026-03-11 | 2026-03-11 13:15 | 2026-03-11 13:45 | 2026-03-11 13:45 | Added `name` and relationship sync. |
+| Resolve Port Conflicts (4000/5174) | ✅ Completed | 2026-03-11 | 2026-03-11 14:00 | 2026-03-11 14:15 | 2026-03-11 14:15 | Used dedicated ports and prestart hooks. |
+| Connect Dashboard to Backend | ✅ Completed | 2026-03-11 | 2026-03-11 11:30 | 2026-03-11 13:30 | 2026-03-11 13:30 | Real data for Profile and Races. |
+| Build Garage UI (Inventory) | ⏳ In Progress | 2026-03-11 | 2026-03-11 15:00 | - | 2026-03-11 15:00 | Using new core components. |
+| Implement Socket.io Live Race | 📅 Pending | 2026-03-11 | - | - | - | Backend to Canvas link. |
+| Build Auction House UI | 📅 Pending | 2026-03-11 | - | - | - | Marketplace implementation. |
