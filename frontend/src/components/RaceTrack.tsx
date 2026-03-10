@@ -22,15 +22,22 @@ const RaceTrack: React.FC<RaceTrackProps> = ({ participants, trackLength, isLive
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
+    let animationFrameId: number;
+
     const render = () => {
-      // Clear
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      // Draw Track Lines
-      ctx.strokeStyle = '#333';
-      ctx.setLineDash([10, 10]);
-      for (let i = 0; i <= participants.length; i++) {
-        const y = (canvas.height / participants.length) * i;
+      // Draw Asphalt Base
+      ctx.fillStyle = '#111';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Draw Lane Dividers
+      ctx.strokeStyle = '#222';
+      ctx.setLineDash([20, 20]);
+      ctx.lineWidth = 1;
+      const laneCount = Math.min(participants.length, 10); // Visual lanes limit
+      for (let i = 1; i < laneCount; i++) {
+        const y = (canvas.height / laneCount) * i;
         ctx.beginPath();
         ctx.moveTo(0, y);
         ctx.lineTo(canvas.width, y);
@@ -38,39 +45,59 @@ const RaceTrack: React.FC<RaceTrackProps> = ({ participants, trackLength, isLive
       }
       ctx.setLineDash([]);
 
-      // Draw Finish Line
-      ctx.strokeStyle = '#e11d48';
-      ctx.lineWidth = 4;
-      ctx.beginPath();
-      ctx.moveTo(canvas.width - 50, 0);
-      ctx.lineTo(canvas.width - 50, canvas.height);
-      ctx.stroke();
+      // Draw Start/Finish Lines
+      ctx.strokeStyle = '#333';
+      ctx.lineWidth = 8;
+      ctx.beginPath(); ctx.moveTo(40, 0); ctx.lineTo(40, canvas.height); ctx.stroke();
+      
+      ctx.strokeStyle = '#e11d48'; // Finish Line
+      ctx.beginPath(); ctx.moveTo(canvas.width - 60, 0); ctx.lineTo(canvas.width - 60, canvas.height); ctx.stroke();
 
-      // Draw Participants
-      participants.forEach((p, index) => {
-        const laneHeight = canvas.height / participants.length;
-        const y = laneHeight * index + laneHeight / 2;
-        const x = (p.position / trackLength) * (canvas.width - 100) + 20;
+      // Draw Participants (Optimized Loop)
+      for (let i = 0; i < participants.length; i++) {
+        const p = participants[i];
+        const laneIndex = i % laneCount;
+        const laneHeight = canvas.height / laneCount;
+        const y = laneHeight * laneIndex + laneHeight / 2;
+        const x = (p.position / trackLength) * (canvas.width - 120) + 40;
 
-        // Draw Car (Placeholder Triangle for MVP)
-        ctx.fillStyle = p.color;
+        // Draw Car Shadow
+        ctx.fillStyle = 'rgba(0,0,0,0.5)';
         ctx.beginPath();
-        ctx.moveTo(x + 20, y);
-        ctx.lineTo(x - 10, y - 10);
-        ctx.lineTo(x - 10, y + 10);
-        ctx.closePath();
+        ctx.ellipse(x, y + 8, 15, 6, 0, 0, Math.PI * 2);
         ctx.fill();
 
-        // Name
-        ctx.fillStyle = 'white';
-        ctx.font = '12px Inter';
-        ctx.fillText(p.name, x - 10, y - 15);
-      });
+        // Draw Car Body (Simplified SVG-like path for performance)
+        ctx.fillStyle = p.color;
+        ctx.shadowBlur = 10;
+        ctx.shadowColor = p.color;
+        
+        ctx.beginPath();
+        ctx.roundRect(x - 15, y - 8, 30, 16, 4);
+        ctx.fill();
+        
+        // Cockpit
+        ctx.fillStyle = 'rgba(255,255,255,0.3)';
+        ctx.beginPath();
+        ctx.roundRect(x, y - 5, 8, 10, 2);
+        ctx.fill();
 
-      requestAnimationFrame(render);
+        ctx.shadowBlur = 0; // Reset shadow for next car
+
+        // Label for top 5 only to avoid clutter
+        if (participants.length < 10 || i < 5) {
+          ctx.fillStyle = 'white';
+          ctx.font = 'bold 10px Inter';
+          ctx.textAlign = 'center';
+          ctx.fillText(p.name, x, y - 12);
+        }
+      }
+
+      animationFrameId = requestAnimationFrame(render);
     };
 
     render();
+    return () => cancelAnimationFrame(animationFrameId);
   }, [participants, trackLength]);
 
   return (
