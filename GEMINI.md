@@ -5,7 +5,7 @@
 2.  **Documentation Sync:** After **EVERY** task, you MUST update the `LOG.md` file (Progress, Tasks, and Next Steps).
 3.  **Component Reusability:** Use/Expand components in `src/components/ui/core.tsx`. Refer to the Library section below.
 4.  **Testing:** Backend features require `npm test` verification.
-5.  **Version Control:** Commit with a descriptive message after every task and doc sync.
+5.  **Version Control:** Commit after every task and doc sync using the standard: `type(scope): description`.
 
 ---
 
@@ -15,6 +15,16 @@
 - **Race Logic:** Outcomes are determined by a tick-based probabilistic formula (Base Stats + Random Weight).
 - **Inventory Rule:** Items listed in the Auction House **MUST NOT** appear in the player's Garage inventory.
 - **Atomic Ops:** All Marketplace/Auction trades MUST use database transactions.
+
+---
+
+## 📝 Git Commit Standard
+- **`feat`**: New feature (e.g., `feat(backend): implement ...`)
+- **`fix`**: Bug fix (e.g., `fix(frontend): resolve ...`)
+- **`docs`**: Documentation only (e.g., `docs: update ...`)
+- **`refactor`**: Code restructuring without behavior change.
+- **`style`**: Aesthetic/CSS/Formatting changes.
+- **`chore`**: Maintenance tasks or dependency updates.
 
 ---
 

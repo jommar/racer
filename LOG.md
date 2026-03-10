@@ -9,7 +9,7 @@ Migration to React (Vite) is complete. Backend is integrated with a fresh Postgr
 - **Infrastructure:** NestJS + PostgreSQL (Port 5433).
 - **Auth:** JWT Auth with auto-redirect on 401. Unified `access_token` naming.
 - **API:** Implemented `/v1/auth/profile`, `/v1/races` (Get All), and Race Logic.
-- **Frontend:** Global racing theme, Canvas engine, and reusable Component Library.
+- **Frontend:** Global racing theme, Canvas engine, Race Simulator (`/simulator`), and reusable Component Library.
 
 ---
 
@@ -17,6 +17,7 @@ Migration to React (Vite) is complete. Backend is integrated with a fresh Postgr
 
 | Task Description | Status | Last Worked | Notes |
 | :--- | :--- | :--- | :--- |
+| Build Race Simulator | ✅ Done | 2026-03-11 | Baseline tool at `/simulator`. |
 | Build Component Library | ✅ Done | 2026-03-11 | Expanded with Modals & Stats. |
 | Implement Auth & Sync | ✅ Done | 2026-03-11 | Integrated with NestJS. |
 | Fix Race Data Model | ✅ Done | 2026-03-11 | Added `name` & relations. |
