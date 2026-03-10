@@ -1,16 +1,37 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Gauge, Mail, Lock, ArrowRight, UserPlus } from 'lucide-react';
+import api from '../services/api';
+import { Gauge, Mail, Lock, ArrowRight, User, AlertCircle, Loader2 } from 'lucide-react';
 
 const Login: React.FC = () => {
   const [isLogin, setIsLogin] = useState(true);
+  const [formData, setFormData] = useState({ email: '', password: '', username: '' });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Simulate login for MVP
-    localStorage.setItem('token', 'mock_token');
-    navigate('/dashboard');
+    setLoading(true);
+    setError(null);
+
+    try {
+      const endpoint = isLogin ? '/auth/login' : '/auth/register';
+      const payload = isLogin 
+        ? { email: formData.email, password: formData.password }
+        : { email: formData.email, password: formData.password, username: formData.username };
+      
+      const { data } = await api.post(endpoint, payload);
+      
+      localStorage.setItem('token', data.accessToken);
+      localStorage.setItem('user', JSON.stringify(data.user));
+      
+      navigate('/dashboard');
+    } catch (err: any) {
+      setError(err.response?.data?.message || 'Authentication failed. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -22,7 +43,7 @@ const Login: React.FC = () => {
       <div className="w-full max-w-4xl grid md:grid-cols-2 racing-card p-0 overflow-hidden border-white/10 shadow-2xl">
         {/* Visual Side */}
         <div className="hidden md:flex flex-col justify-between p-12 bg-gradient-to-br from-primary to-secondary relative group">
-           <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-30 group-hover:opacity-40 transition-opacity"></div>
+           <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-30"></div>
            
            <div className="relative z-10">
              <div className="flex items-center gap-2 mb-8">
@@ -36,15 +57,10 @@ const Login: React.FC = () => {
              </h2>
            </div>
 
-           <div className="relative z-10 space-y-4">
-             <p className="text-white/80 font-medium leading-relaxed">
+           <div className="relative z-10 space-y-4 text-white/80">
+             <p className="font-medium leading-relaxed">
                Join thousands of drivers in the ultimate decentralized racing circuit. Build your garage, dominate the track, and win big.
              </p>
-             <div className="flex gap-2">
-               {[1, 2, 3].map(i => (
-                 <div key={i} className="w-2 h-2 rounded-full bg-white/30" />
-               ))}
-             </div>
            </div>
         </div>
 
@@ -59,14 +75,23 @@ const Login: React.FC = () => {
             </p>
           </div>
 
+          {error && (
+            <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-lg flex items-center gap-3 text-red-500 text-xs font-bold animate-shake">
+              <AlertCircle className="w-4 h-4" />
+              {error}
+            </div>
+          )}
+
           <form onSubmit={handleSubmit} className="space-y-4">
             {!isLogin && (
               <div className="space-y-1.5">
                 <label className="text-[10px] font-black uppercase text-gray-500 tracking-widest ml-1">Username</label>
                 <div className="relative group">
-                  <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 group-focus-within:text-primary transition-colors" />
+                  <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 group-focus-within:text-primary transition-colors" />
                   <input 
                     type="text" required
+                    value={formData.username}
+                    onChange={(e) => setFormData({...formData, username: e.target.value})}
                     placeholder="racer_one"
                     className="w-full bg-black/40 border border-white/5 rounded-lg py-3 pl-11 pr-4 focus:border-primary/50 focus:ring-1 focus:ring-primary/20 outline-none transition-all text-sm font-medium"
                   />
@@ -80,6 +105,8 @@ const Login: React.FC = () => {
                 <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 group-focus-within:text-primary transition-colors" />
                 <input 
                   type="email" required
+                  value={formData.email}
+                  onChange={(e) => setFormData({...formData, email: e.target.value})}
                   placeholder="driver@nitrodash.com"
                   className="w-full bg-black/40 border border-white/5 rounded-lg py-3 pl-11 pr-4 focus:border-primary/50 focus:ring-1 focus:ring-primary/20 outline-none transition-all text-sm font-medium"
                 />
@@ -92,15 +119,27 @@ const Login: React.FC = () => {
                 <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 group-focus-within:text-primary transition-colors" />
                 <input 
                   type="password" required
+                  value={formData.password}
+                  onChange={(e) => setFormData({...formData, password: e.target.value})}
                   placeholder="••••••••"
                   className="w-full bg-black/40 border border-white/5 rounded-lg py-3 pl-11 pr-4 focus:border-primary/50 focus:ring-1 focus:ring-primary/20 outline-none transition-all text-sm font-medium"
                 />
               </div>
             </div>
 
-            <button type="submit" className="w-full btn-primary py-4 mt-4 flex items-center justify-center gap-2 group">
-              {isLogin ? 'Access Garage' : 'Initialize Account'}
-              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+            <button 
+              type="submit" 
+              disabled={loading}
+              className="w-full btn-primary py-4 mt-4 flex items-center justify-center gap-2 group disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {loading ? (
+                <Loader2 className="w-5 h-5 animate-spin" />
+              ) : (
+                <>
+                  {isLogin ? 'Access Garage' : 'Initialize Account'}
+                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                </>
+              )}
             </button>
           </form>
 
@@ -110,9 +149,9 @@ const Login: React.FC = () => {
               className="text-xs font-bold text-gray-500 hover:text-white transition-colors flex items-center justify-center gap-2 w-full"
             >
               {isLogin ? (
-                <>New to NitroDash? <span className="text-primary uppercase tracking-widest">Create Profile</span></>
+                <>New to NitroDash? <span className="text-primary uppercase tracking-widest ml-1">Create Profile</span></>
               ) : (
-                <>Already a Driver? <span className="text-primary uppercase tracking-widest">Log In</span></>
+                <>Already a Driver? <span className="text-primary uppercase tracking-widest ml-1">Log In</span></>
               )}
             </button>
           </div>

@@ -1,8 +1,8 @@
 import { WebSocketGateway, WebSocketServer, SubscribeMessage, MessageBody, ConnectedSocket } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-import { RacesService } from './races.service';
+import { RacesService } from '../modules/races/races.service';
 import { UseGuards } from '@nestjs/common';
-import { UserRole } from '../auth/user.entity';
+import { UserRole } from '../modules/auth/user.entity';
 
 @WebSocketGateway({ cors: { origin: '*' } })
 export class RacesGateway {

@@ -1,19 +1,42 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Navbar from '../components/Navbar';
+import api from '../services/api';
+import { Race, User } from '../types';
 import { 
-  Trophy, Settings, Plus, Users, LayoutDashboard, 
-  Flag, Package, MoreVertical, Edit2, Trash2, Search
+  Trophy, Settings, Plus, Users, 
+  Flag, Package, MoreVertical, Edit2, Trash2, Search, Loader2
 } from 'lucide-react';
 
 const AdminDashboard: React.FC = () => {
   const [activeTab, setActiveTab] = useState('races');
+  const [races, setRaces] = useState<Race[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState('');
 
-  // Mock Admin Data
-  const races = [
-    { id: '1', name: 'Grand City Sprint', status: 'Running', participants: 12, prize: '5,000 ND' },
-    { id: '2', name: 'Underground Drift', status: 'Scheduled', participants: 45, prize: '2,500 ND' },
-    { id: '3', name: 'Midnight Circuit', status: 'Completed', participants: 8, prize: '10,000 ND' },
-  ];
+  useEffect(() => {
+    const fetchAdminData = async () => {
+      try {
+        const racesRes = await api.get('/races');
+        setRaces(racesRes.data);
+      } catch (error) {
+        console.error('Failed to fetch admin data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAdminData();
+  }, []);
+
+  const filteredRaces = races.filter(r => r.name.toLowerCase().includes(search.toLowerCase()));
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="w-12 h-12 text-primary animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen">
@@ -54,7 +77,9 @@ const AdminDashboard: React.FC = () => {
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 group-focus-within:text-primary" />
                 <input 
                   type="text" 
-                  placeholder="Search races, users, or items..."
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  placeholder="Search races..."
                   className="w-full bg-secondary/40 border border-white/5 rounded-lg py-2.5 pl-11 pr-4 focus:border-primary/50 outline-none text-sm"
                 />
               </div>
@@ -66,9 +91,8 @@ const AdminDashboard: React.FC = () => {
             {/* Quick Stats */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {[
-                { label: 'Active Races', value: '3', color: 'text-primary' },
-                { label: 'Total Users', value: '1,240', color: 'text-blue-500' },
-                { label: 'Market Volume', value: '450K ND', color: 'text-accent' },
+                { label: 'Active Races', value: races.filter(r => r.status === 'RUNNING').length, color: 'text-primary' },
+                { label: 'Total Races', value: races.length, color: 'text-blue-500' },
                 { label: 'System Status', value: 'Healthy', color: 'text-green-500' },
               ].map((stat, i) => (
                 <div key={i} className="racing-card p-3 border-white/5">
@@ -81,8 +105,8 @@ const AdminDashboard: React.FC = () => {
             {/* Main Management Table */}
             <div className="racing-card p-0 overflow-hidden border-white/5 bg-secondary/30">
               <div className="p-4 border-b border-white/5 flex justify-between items-center bg-white/5">
-                <h3 className="text-sm font-black uppercase italic tracking-widest">Active Race Registry</h3>
-                <span className="text-[10px] font-bold text-gray-500 italic">Auto-refreshing every 30s</span>
+                <h3 className="text-sm font-black uppercase italic tracking-widest">Race Registry</h3>
+                <span className="text-[10px] font-bold text-gray-500 italic">Live data from NitroDash Circuit</span>
               </div>
               <div className="overflow-x-auto">
                 <table className="w-full text-left">
@@ -96,20 +120,20 @@ const AdminDashboard: React.FC = () => {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-white/5">
-                    {races.map(race => (
+                    {filteredRaces.map(race => (
                       <tr key={race.id} className="hover:bg-white/5 transition-colors group">
                         <td className="px-6 py-4 font-bold italic">{race.name}</td>
                         <td className="px-6 py-4">
                           <span className={`px-2 py-0.5 rounded-full text-[10px] font-black uppercase ${
-                            race.status === 'Running' ? 'bg-green-500/10 text-green-500' :
-                            race.status === 'Scheduled' ? 'bg-blue-500/10 text-blue-500' :
+                            race.status === 'RUNNING' ? 'bg-green-500/10 text-green-500' :
+                            race.status === 'PENDING' ? 'bg-blue-500/10 text-blue-500' :
                             'bg-gray-500/10 text-gray-500'
                           }`}>
                             {race.status}
                           </span>
                         </td>
-                        <td className="px-6 py-4 text-sm font-medium">{race.participants} Drivers</td>
-                        <td className="px-6 py-4 text-sm font-black text-accent">{race.prize}</td>
+                        <td className="px-6 py-4 text-sm font-medium">{race.participantsCount} Drivers</td>
+                        <td className="px-6 py-4 text-sm font-black text-accent">{race.prizePool.toLocaleString()} ND</td>
                         <td className="px-6 py-4 text-right">
                           <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                             <button className="p-2 hover:bg-white/10 rounded-lg text-gray-400 hover:text-white transition-colors">
@@ -118,13 +142,17 @@ const AdminDashboard: React.FC = () => {
                             <button className="p-2 hover:bg-red-500/10 rounded-lg text-gray-400 hover:text-red-500 transition-colors">
                               <Trash2 className="w-4 h-4" />
                             </button>
-                            <button className="p-2 hover:bg-white/10 rounded-lg text-gray-400 hover:text-white transition-colors">
-                              <MoreVertical className="w-4 h-4" />
-                            </button>
                           </div>
                         </td>
                       </tr>
                     ))}
+                    {filteredRaces.length === 0 && (
+                      <tr>
+                        <td colSpan={5} className="px-6 py-12 text-center text-gray-500 italic">
+                          No races found matching your criteria.
+                        </td>
+                      </tr>
+                    )}
                   </tbody>
                 </table>
               </div>
