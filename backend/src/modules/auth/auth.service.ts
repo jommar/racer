@@ -84,4 +84,12 @@ export class AuthService implements OnModuleInit {
     }
     return null;
   }
+
+  async getUserProfile(id: string): Promise<User> {
+    const user = await this.userRepository.findOneBy({ id });
+    if (!user) {
+      throw new Error('User not found');
+    }
+    return user;
+  }
 }

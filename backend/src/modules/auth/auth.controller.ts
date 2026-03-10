@@ -1,6 +1,7 @@
-import { Controller, Post, Body, UnauthorizedException } from '@nestjs/common';
+import { Controller, Post, Body, UnauthorizedException, Get, UseGuards, Request } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { RegisterDto, LoginDto } from './dto/auth.dto';
+import { JwtAuthGuard } from './jwt-auth.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -18,5 +19,12 @@ export class AuthController {
       throw new UnauthorizedException('Invalid email or password');
     }
     return this.authService.login(user);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('profile')
+  async getProfile(@Request() req) {
+    // The JwtAuthGuard attaches the decoded payload to req.user as { sub: id, email, role }
+    return this.authService.getUserProfile(req.user.sub);
   }
 }

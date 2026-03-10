@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
+import { X } from 'lucide-react';
 
 /**
  * Utility for merging tailwind classes safely
@@ -9,6 +10,7 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
+// --- BUTTON ---
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger';
   size?: 'sm' | 'md' | 'lg' | 'xl';
@@ -58,6 +60,7 @@ export const Button: React.FC<ButtonProps> = ({
   );
 };
 
+// --- CARD ---
 interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
   glass?: boolean;
   hover?: boolean;
@@ -79,6 +82,7 @@ export const Card: React.FC<CardProps> = ({ className, glass = true, hover = tru
   );
 };
 
+// --- INPUT ---
 interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   label?: string;
   error?: string;
@@ -114,6 +118,7 @@ export const Input: React.FC<InputProps> = ({ label, error, icon, className, ...
   );
 };
 
+// --- BADGE ---
 interface BadgeProps {
   children: React.ReactNode;
   variant?: 'primary' | 'success' | 'warning' | 'info' | 'gray';
@@ -134,3 +139,112 @@ export const Badge: React.FC<BadgeProps> = ({ children, variant = 'gray' }) => {
     </span>
   );
 };
+
+// --- MODAL ---
+interface ModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  title: string;
+  children: React.ReactNode;
+}
+
+export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children }) => {
+  useEffect(() => {
+    if (isOpen) document.body.style.overflow = 'hidden';
+    else document.body.style.overflow = 'unset';
+    return () => { document.body.style.overflow = 'unset'; };
+  }, [isOpen]);
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={onClose} />
+      <Card className="relative w-full max-w-lg z-10 shadow-3xl border-primary/20 animate-in fade-in zoom-in duration-200" glass>
+        <div className="flex justify-between items-center p-6 border-b border-white/5">
+          <h2 className="text-xl font-black uppercase italic tracking-tighter">{title}</h2>
+          <button onClick={onClose} className="p-2 hover:bg-white/5 rounded-full transition-colors">
+            <X className="w-5 h-5 text-gray-500 hover:text-white" />
+          </button>
+        </div>
+        <div className="p-6">{children}</div>
+      </Card>
+    </div>
+  );
+};
+
+// --- STATS PROGRESS ---
+interface StatsProgressProps {
+  label: string;
+  value: number;
+  max?: number;
+  potential?: number; // Show predicted improvement
+}
+
+export const StatsProgress: React.FC<StatsProgressProps> = ({ label, value, max = 100, potential = 0 }) => {
+  const percentage = Math.min((value / max) * 100, 100);
+  const potentialPercentage = Math.min(((value + potential) / max) * 100, 100);
+
+  return (
+    <div className="space-y-1">
+      <div className="flex justify-between items-end">
+        <span className="text-[10px] font-black uppercase text-gray-500 tracking-widest">{label}</span>
+        <span className="text-xs font-bold italic">
+          {value}
+          {potential > 0 && <span className="text-primary ml-1">+{potential}</span>}
+        </span>
+      </div>
+      <div className="h-2 bg-white/5 rounded-full overflow-hidden relative border border-white/5">
+        {/* Base Bar */}
+        <div 
+          className="h-full bg-primary/40 absolute top-0 left-0 transition-all duration-500"
+          style={{ width: `${potentialPercentage}%` }}
+        />
+        <div 
+          className="h-full bg-primary absolute top-0 left-0 transition-all duration-500 shadow-[0_0_8px_rgba(225,29,72,0.8)]"
+          style={{ width: `${percentage}%` }}
+        />
+      </div>
+    </div>
+  );
+};
+
+// --- TABS ---
+interface TabOption {
+  id: string;
+  label: string;
+  icon?: React.ReactNode;
+}
+
+interface TabsProps {
+  options: TabOption[];
+  activeTab: string;
+  onTabChange: (id: string) => void;
+}
+
+export const Tabs: React.FC<TabsProps> = ({ options, activeTab, onTabChange }) => {
+  return (
+    <div className="flex border-b border-white/5 bg-secondary/20 p-1 rounded-xl">
+      {options.map((option) => (
+        <button
+          key={option.id}
+          onClick={() => onTabChange(option.id)}
+          className={cn(
+            'flex-1 flex items-center justify-center gap-2 py-3 text-xs font-black uppercase tracking-widest rounded-lg transition-all',
+            activeTab === option.id 
+              ? 'bg-primary text-white shadow-lg' 
+              : 'text-gray-500 hover:text-white hover:bg-white/5'
+          )}
+        >
+          {option.icon}
+          {option.label}
+        </button>
+      ))}
+    </div>
+  );
+};
+
+// --- SKELETON ---
+export const Skeleton: React.FC<{ className?: string }> = ({ className }) => (
+  <div className={cn('animate-pulse bg-white/5 rounded-lg', className)} />
+);
