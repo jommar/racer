@@ -12,5 +12,5 @@ This file contains absolute mandates for any AI agent working on this project.
 
 ## Architectural Constraints
 - **Backend:** NestJS with PostgreSQL. Use Atomic Transactions for all Auction/Marketplace logic.
-- **Frontend:** Flutter (Web/Mobile). Use `CustomPainter` for the race track.
+- **Frontend:** React (TypeScript) with Vite. Use HTML5 Canvas or SVG for the race track.
 - **Real-time:** Socket.io via NestJS Gateways.
