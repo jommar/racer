@@ -39,6 +39,9 @@
     - Performed initial repository commit with 59 files.
 - **Security & Performance:**
     - Global Rate Limiting (10 requests per minute) implemented using `@nestjs/throttler`.
+- **API Versioning:**
+    - Implemented `/v1` global prefix for all backend routes.
+    - Updated Postman collection to reflect versioned routes.
 
 ## ⏳ In Progress / Not Done
 - **Frontend (Flutter):**

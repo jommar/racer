@@ -19,6 +19,9 @@ async function bootstrap() {
   app.useGlobalFilters(new RacingExceptionFilter());
   app.useGlobalInterceptors(new LoggingInterceptor());
 
+  // Versioning
+  app.setGlobalPrefix('v1');
+
   // Security
   app.enableCors();
 

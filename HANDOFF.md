@@ -8,6 +8,7 @@
 - **Documentation:** Updated `GEMINI.md` mandates for more frequent documentation syncs.
 - **Git:** Initial commit completed (59 files staged and committed).
 - **Security:** Global Rate Limiting implemented in Backend.
+- **API:** Implemented `/v1` versioning for all routes. Postman collection updated.
 
 ## Immediate Next Task: Flutter Implementation
 Flutter CLI is not installed on the system. Flutter project initialization in the `frontend` directory needs to be performed on a machine with Flutter installed.
