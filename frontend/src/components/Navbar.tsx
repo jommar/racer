@@ -3,7 +3,7 @@ import { Trophy, Gauge, ShoppingCart, LogOut, User, Cpu } from 'lucide-react';
 
 const Navbar: React.FC = () => {
   return (
-    <nav className="border-b border-white/10 bg-background/50 backdrop-blur-md sticky top-0 z-50">
+    <nav className="nav-glass">
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
         <Link to="/" className="flex items-center gap-2 group cursor-pointer">
           <div className="p-2 bg-primary rounded-lg group-hover:rotate-12 transition-transform">
