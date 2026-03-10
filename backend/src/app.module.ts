@@ -23,7 +23,7 @@ import { HealthModule } from './modules/health/health.module';
       useFactory: (config: ConfigService) => ({
         type: 'postgres',
         host: config.get<string>('DB_HOST', 'localhost'),
-        port: config.get<number>('DB_PORT', 5432),
+        port: config.get<number>('DB_PORT', 5433),
         username: config.get<string>('DB_USERNAME', 'postgres'),
         password: config.get<string>('DB_PASSWORD', 'postgres'),
         database: config.get<string>('DB_DATABASE', 'racing_app'),

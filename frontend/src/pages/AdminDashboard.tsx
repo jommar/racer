@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Navbar from '../components/Navbar';
 import api from '../services/api';
-import { Race, User } from '../types';
+import { Race, User } from '../types/index';
 import { 
   Trophy, Settings, Plus, Users, 
   Flag, Package, MoreVertical, Edit2, Trash2, Search, Loader2

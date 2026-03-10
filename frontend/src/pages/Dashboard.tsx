@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Navbar from '../components/Navbar';
 import RaceTrack from '../components/RaceTrack';
 import api from '../services/api';
-import { Car, Race, User } from '../types';
+import { Car, Race, User } from '../types/index';
 import { Gauge, Trophy, Zap, ChevronRight, ShoppingBag, Loader2 } from 'lucide-react';
 
 const Dashboard: React.FC = () => {
