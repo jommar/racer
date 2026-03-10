@@ -146,6 +146,13 @@ export class RacesService {
     return JSON.parse(decompressed);
   }
 
+  async findAll() {
+    return this.raceRepository.find({
+      relations: ['participants'],
+      order: { created_at: 'DESC' },
+    });
+  }
+
   async removeParticipant(raceId: string, carId: string) {
     await this.participantRepository.delete({ race: { id: raceId }, car: { id: carId } });
     return { success: true };

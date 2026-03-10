@@ -22,6 +22,20 @@ export class RacesController {
     return this.racesService.create(req.user, body.trackLength, body.reward, startAt);
   }
 
+  @Get()
+  async findAll() {
+    const races = await this.racesService.findAll();
+    return races.map(r => ({
+      id: r.id,
+      name: r.name,
+      status: r.status,
+      trackLength: r.track_length,
+      prizePool: r.reward.currency || 0,
+      participantsCount: r.participants?.length || 0,
+      startTime: r.start_at,
+    }));
+  }
+
   @Post(':id/register')
   async register(@Request() req: any, @Param('id') id: string, @Body() body: RegisterRaceDto) {
     return this.racesService.register(req.user, id, body.carId);

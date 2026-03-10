@@ -23,7 +23,7 @@ const Login: React.FC = () => {
       
       const { data } = await api.post(endpoint, payload);
       
-      localStorage.setItem('token', data.accessToken);
+      localStorage.setItem('token', data.access_token);
       localStorage.setItem('user', JSON.stringify(data.user));
       
       navigate('/dashboard');
