@@ -67,7 +67,7 @@ describe('RacesService', () => {
 
   describe('create', () => {
     it('should create a new race', async () => {
-      const result = await service.create(mockAdmin, 10, { currency: 500 });
+      const result = await service.create(mockAdmin, 'Test Race', 10, { currency: 500 });
       expect(raceRepository.save).toHaveBeenCalled();
       expect(result.track_length).toEqual(10);
     });

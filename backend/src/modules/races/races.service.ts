@@ -28,9 +28,10 @@ export class RacesService {
     private dataSource: DataSource,
   ) {}
 
-  async create(admin: User, trackLength: number, reward: any, startAt?: Date) {
+  async create(admin: User, name: string, trackLength: number, reward: any, startAt?: Date) {
     const race = this.raceRepository.create({
       admin,
+      name,
       track_length: trackLength,
       reward,
       start_at: startAt,

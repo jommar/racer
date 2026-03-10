@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, CreateDateColumn, Index } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, OneToMany, CreateDateColumn, Index } from 'typeorm';
 import { User } from '../auth/user.entity';
 import { Car } from '../cars/car.entity';
 
@@ -12,6 +12,9 @@ export enum RaceStatus {
 export class Race {
   @PrimaryGeneratedColumn('uuid')
   id: string;
+
+  @Column({ default: 'Unnamed Circuit' })
+  name: string;
 
   @ManyToOne(() => User, (user) => user.id)
   admin: User;
@@ -28,6 +31,9 @@ export class Race {
   @Index()
   @Column({ type: 'enum', enum: RaceStatus, default: RaceStatus.PENDING })
   status: RaceStatus;
+
+  @OneToMany(() => RaceParticipant, (participant) => participant.race)
+  participants: RaceParticipant[];
 
   @Index()
   @Column({ type: 'timestamp', nullable: true })

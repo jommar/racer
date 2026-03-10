@@ -1,6 +1,9 @@
-import { IsNumber, IsPositive, IsObject, IsOptional, IsDateString, IsUUID } from 'class-validator';
+import { IsNumber, IsPositive, IsObject, IsOptional, IsDateString, IsUUID, IsString } from 'class-validator';
 
 export class CreateRaceDto {
+  @IsString()
+  name: string;
+
   @IsNumber()
   @IsPositive()
   trackLength: number;

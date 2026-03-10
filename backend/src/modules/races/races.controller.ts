@@ -19,7 +19,7 @@ export class RacesController {
   @Roles(UserRole.ADMIN, UserRole.SUPERADMIN)
   async create(@Request() req: any, @Body() body: CreateRaceDto) {
     const startAt = body.startAt ? new Date(body.startAt) : undefined;
-    return this.racesService.create(req.user, body.trackLength, body.reward, startAt);
+    return this.racesService.create(req.user, body.name, body.trackLength, body.reward, startAt);
   }
 
   @Get()
