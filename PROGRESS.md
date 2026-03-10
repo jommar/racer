@@ -37,10 +37,12 @@
     - Updated AI Agent Mandates in `GEMINI.md` to require documentation sync after every task.
     - Created root `.gitignore` file for first commit.
     - Performed initial repository commit with 59 files.
+- **Security & Performance:**
+    - Global Rate Limiting (10 requests per minute) implemented using `@nestjs/throttler`.
 
 ## ⏳ In Progress / Not Done
 - **Frontend (Flutter):**
-    - Project initialization (Scaffolded but needs implementation).
+    - Project initialization (Blocked: Flutter CLI not installed on this system).
     - Real-time track visualization using `CustomPainter`.
     - User Dashboard (Garage & Customization).
     - Admin Dashboard (Race control & Asset creation).
@@ -55,4 +57,4 @@
 - **Race Formula Balance:** Testing the probabilistic weights to ensure "puncher's chance" for base cars feels fair.
 - **Auction House Search:** Adding filters for stats (e.g., "Show only engines with speed > 5").
 - **Asset Management:** Refining how admins pick from "templates" (dynamic asset mapping).
-- **Security:** Implementing Refresh Tokens and Rate Limiting for the API.
+- **Security:** Implementing Refresh Tokens.

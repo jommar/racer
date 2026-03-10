@@ -7,9 +7,10 @@
 - **Postman:** `backend/racing-app.postman_collection.json` ready for manual API validation.
 - **Documentation:** Updated `GEMINI.md` mandates for more frequent documentation syncs.
 - **Git:** Initial commit completed (59 files staged and committed).
+- **Security:** Global Rate Limiting implemented in Backend.
 
 ## Immediate Next Task: Flutter Implementation
-Since `flutter` was unavailable in the previous session, the focus for the next session should be building the **Frontend Prototype**.
+Flutter CLI is not installed on the system. Flutter project initialization in the `frontend` directory needs to be performed on a machine with Flutter installed.
 
 ### 1. Flutter Setup (User Side)
 Ensure `flutter` is installed and run `flutter create --platforms web,android,ios .` in the `frontend` directory.
