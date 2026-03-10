@@ -35,6 +35,7 @@
     - Detailed cURL documentation for core flows.
 - **Documentation & Mandates:**
     - Updated AI Agent Mandates in `GEMINI.md` to require documentation sync after every task.
+    - Added git commit mandate (Rule 6) to AI Agent Mandates.
     - Created root `.gitignore` file for first commit.
     - Performed initial repository commit with 59 files.
 - **Security & Performance:**
