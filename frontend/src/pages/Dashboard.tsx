@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Navbar from '../components/Navbar';
 import RaceTrack from '../components/RaceTrack';
 import api from '../services/api';
-import { Car, Race, User } from '../types/index';
+import type { Car, Race, User } from '../types/index';
 import { Gauge, Trophy, Zap, ChevronRight, ShoppingBag, Loader2 } from 'lucide-react';
 
 const Dashboard: React.FC = () => {
@@ -15,14 +15,14 @@ const Dashboard: React.FC = () => {
     const fetchDashboardData = async () => {
       try {
         const [userRes, carsRes, racesRes] = await Promise.all([
-          api.get('/auth/profile'), // Assuming this endpoint exists based on standard NestJS patterns
+          api.get('/auth/profile'),
           api.get('/cars/garage'),
           api.get('/races'),
         ]);
 
         setUser(userRes.data);
-        setCars(carsRes.data);
-        setRaces(racesRes.data);
+        setCars(carsRes.data || []);
+        setRaces(racesRes.data || []);
       } catch (error) {
         console.error('Failed to fetch dashboard data:', error);
       } finally {
